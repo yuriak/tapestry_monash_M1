@@ -35,3 +35,7 @@ Paired comparison aligns exact query tuples within each benchmark/split/collecti
 ## Audit limits
 
 The overlap audit streams normalized corpus documents against the small benchmark collection. It records exact normalized-text hashes, literal full-benchmark-text containment for passages at least 80 characters, canonical URL matches, source counts, fingerprints and coverage. Normalization for matching is NFKC, casefold and whitespace collapse only; stored dataset text remains unchanged. It does not detect paraphrase, fragments, all duplicates or shared legal substance. No matches never proves uncontaminated evaluation; a partial corpus also leaves the unscanned source pending.
+
+## Proposed gateway transport
+
+The optional [L0 batch envelope](gateway.md) adds version, provenance, origin and rank-lineage fields without changing this v1 normalized data/evaluation contract. Partner acceptance remains pending.

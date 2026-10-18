@@ -1,0 +1,15 @@
+# Local batch I/O v1
+
+`m1.gateway.batch.v1` is a proposed local file contract. Partner acceptance is pending confirmation. It is not a network API. The CPU-only L0 adapter validates and copies valid payloads unchanged; **L0 provides no privacy protection**. L1/L2/L3 are reserved labels and rejected as unsupported. No redaction, rewriting or model generation is implemented.
+
+A JSONL file is a batch; each line is one request. See the fully synthetic [request](../tests/fixtures/gateway/request.jsonl) and [response](../tests/fixtures/gateway/response.jsonl). Top-level fields are `schema_version`, unique `request_id`, `abstraction_level=L0`, `context={node,jurisdiction}`, `query`, `ranking`, `evidence`. The existing [query/document/ranking contract](contracts.md) applies. The query and ranking identities must match and the collection must be explicitly allowlisted by the receiver.
+
+`evidence` is an explicit list of documents covering exactly the candidate IDs. Each includes `source_doc_id` (native document lineage in the same collection), `node`, `jurisdiction`, `source_class` (`synthetic`, `benchmark_native`, `public_corpus`, `partner_supplied`) and `source_reference={source_id,revision,original_doc_id}`. A revision is a nonempty provenance label: immutable upstream commits/checksums must be agreed separately. This adapter checks structure, not authenticity or rights. Chunk text retains its native parent ID; span metadata may be carried unchanged. Node labels identify origins without asserting ownership or partner availability.
+
+Candidates retain `rank`, `score` and additionally require `original_rank`, `reranked_rank`. Original ranks form a permutation of 1..N; current/reranked ranks equal list position. Unknown additional fields/metadata pass through unchanged; they are not interpreted or sanitized. A response adds `status=ok|no_evidence|error` and `errors=[{code,message}]`. Empty ranking plus empty evidence yields `no_evidence`; missing evidence for nonempty candidates is an error. Invalid records return a sanitized error envelope without invalid text; this is error handling, not a privacy mechanism. Duplicate batch request IDs, malformed JSON, budget violations or file conflicts fail the batch atomically. Record-level errors can coexist with valid records; consumers must inspect every status.
+
+```bash
+./scripts/run python -m tapestry_m1.gateway tests/fixtures/gateway/request.jsonl outputs/gateway-response.jsonl --collection demo
+```
+
+The CLI defaults/hard caps are 1000 records, 1000 candidates/evidence per request and 1 MiB per JSONL line; callers can lower budgets. Outputs finalize exclusively and identical existing bytes are reusable. No network, datasets, model weights or coordinating repository are required. For large evidence, define a separately reviewed reference-resolution transport rather than increasing these budgets silently. Partner sign-off remains necessary for schema/version mapping, collection and source namespaces, lineage, jurisdiction labels, error/retry semantics, limits and any future authenticated transport.
