@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "dataset_id": "au-open-australian-legal-qa",
+  "collection_id": "au-open-australian-legal-qa-native",
+  "adapter": "open_au_qa",
+  "repo_id": "isaacus/open-australian-legal-qa",
+  "revision": "a2178afc2cff8af50fe4365c7d6f9cecf91dbe4b",
+  "canonical_url": "https://huggingface.co/datasets/isaacus/open-australian-legal-qa",
+  "node": "AU",
+  "jurisdiction": "Australia",
+  "intended_use": "Future generator training, never retrieval qrels",
+  "access_type": "public",
+  "license": "inherits Open Australian Legal Corpus source-specific terms",
+  "terms_url": "https://huggingface.co/datasets/isaacus/open-australian-legal-qa/blob/a2178afc2cff8af50fe4365c7d6f9cecf91dbe4b/README.md",
+  "splits": [
+    "train"
+  ],
+  "expected_counts": {
+    "training_pairs": 1918
+  },
+  "files": [
+    "qa.jsonl"
+  ],
+  "file_sha256": {
+    "qa.jsonl": "dd2ad463a00307ad04aa035b0a382a2a6033d5b45cdde9e343d2e9bc96d5a6c9"
+  },
+  "acquisition_allowed": true,
+  "unresolved_flags": [
+    "source_specific_copyright",
+    "source_document_identity_not_joined_to_current_corpus",
+    "card_intro_2124_vs_metadata_1918"
+  ],
+  "label_semantics": "not evaluation qrels",
+  "text_policy": "native boundaries; unmodified source text; no chunking"
+}

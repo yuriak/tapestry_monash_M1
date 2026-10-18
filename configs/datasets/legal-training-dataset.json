@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "dataset_id": "au-legal-training-dataset",
+  "collection_id": "au-legal-training-dataset-native",
+  "adapter": "judicialmind_metadata",
+  "repo_id": "judicialmind/legal-training-dataset",
+  "revision": "8ed53a3527c78823ba12e979134dcdac152f8e55",
+  "canonical_url": "https://huggingface.co/datasets/judicialmind/legal-training-dataset",
+  "node": "AU",
+  "jurisdiction": "Australia",
+  "intended_use": "Future AU reranker data: metadata-only until rights reviewed",
+  "access_type": "public",
+  "license": "cc-by-nc-nd-4.0",
+  "terms_url": "https://huggingface.co/datasets/judicialmind/legal-training-dataset/blob/8ed53a3527c78823ba12e979134dcdac152f8e55/README.md",
+  "splits": [
+    "train"
+  ],
+  "expected_counts": {
+    "training_pairs": 2218
+  },
+  "files": [],
+  "file_sha256": {},
+  "acquisition_allowed": false,
+  "unresolved_flags": [
+    "blocked_pending_license_review",
+    "AU_file_A_B_C_counts_unverified",
+    "viewer_merges_all_files_into_train_card_bucket_suggestions_are_not_official_normalized_splits"
+  ],
+  "label_semantics": "not evaluation qrels",
+  "text_policy": "native boundaries; unmodified source text; no chunking",
+  "metadata_paths": [
+    "english_world/au/australian_legal_qa_A.parquet",
+    "english_world/au/australian_legal_qa_B.parquet",
+    "english_world/au/australian_legal_qa_C.parquet"
+  ],
+  "suggested_file_buckets": {
+    "A": "training",
+    "B": "validation or additional training",
+    "C": "held-out evaluation"
+  },
+  "normalized_split_policy": "unassigned_pending_rights_and_split_review"
+}

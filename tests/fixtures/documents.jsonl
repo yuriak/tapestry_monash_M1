@@ -1,0 +1,3 @@
+{"collection_id": "c", "doc_id": "c::a", "text": "Synthetic relevant document."}
+{"collection_id": "c", "doc_id": "c::b", "text": "Synthetic distractor document."}
+{"collection_id": "other", "doc_id": "other::a", "text": "Another collection with the same raw ID."}

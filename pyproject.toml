@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tapestry-m1"
+version = "0.1.0"
+description = "Model-independent legal retrieval data contracts and CPU evaluation"
+requires-python = ">=3.11,<3.12"
+dependencies = []
+
+[project.scripts]
+tapestry-m1 = "tapestry_m1.cli:main"
+
+[dependency-groups]
+dev = ["pytest==8.4.2"]
+
+[tool.uv]
+python-preference = "only-managed"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

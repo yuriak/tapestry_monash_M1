@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$project_root"
+uv_bin="${M1_UV_BIN:-$project_root/.runtime/tools/uv/uv}"
+if [[ ! -x "$uv_bin" ]]; then
+  printf '%s\n' 'Install uv 0.13.1 or set M1_UV_BIN to its executable; see README.' >&2
+  exit 2
+fi
+if [[ "$("$uv_bin" --version)" != 'uv 0.13.1'* ]]; then
+  printf '%s\n' 'This environment requires uv 0.13.1.' >&2
+  exit 2
+fi
+unset VIRTUAL_ENV CONDA_PREFIX CONDA_DEFAULT_ENV PYTHONPATH PYTHONHOME
+export UV_PYTHON_INSTALL_DIR="$project_root/.runtime/python"
+export UV_CACHE_DIR="$project_root/.runtime/cache/uv"
+export UV_PROJECT_ENVIRONMENT="$project_root/.venv"
+export TMPDIR="$project_root/.runtime/tmp"
+mkdir -p "$TMPDIR"
+exec "$uv_bin" run --locked --managed-python "$@"

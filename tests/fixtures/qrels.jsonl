@@ -1,0 +1,2 @@
+{"dataset_id": "bench", "split": "test", "query_id": "bench::q1", "doc_id": "c::a", "relevance": 2}
+{"dataset_id": "bench", "split": "test", "query_id": "bench::q2", "doc_id": "c::a", "relevance": 1}

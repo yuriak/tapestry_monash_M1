@@ -1,0 +1,2 @@
+{"dataset_id": "bench", "split": "test", "query_id": "bench::q1", "query_text": "Synthetic question one?", "collection_id": "c"}
+{"dataset_id": "bench", "split": "test", "query_id": "bench::q2", "query_text": "Synthetic question two?", "collection_id": "c"}

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "dataset_id": "au-australian-tax-guidance-retrieval",
+  "collection_id": "au-australian-tax-guidance-retrieval-native",
+  "adapter": "tax_guidance",
+  "repo_id": "isaacus/australian-tax-guidance-retrieval",
+  "revision": "982aa11494f04dee16cacf18ae1fbf59f6669845",
+  "canonical_url": "https://huggingface.co/datasets/isaacus/australian-tax-guidance-retrieval",
+  "node": "AU",
+  "jurisdiction": "Australia",
+  "intended_use": "MLEB retrieval evaluation on official 105-document collection",
+  "access_type": "public",
+  "license": "cc-by-4.0",
+  "terms_url": "https://huggingface.co/datasets/isaacus/australian-tax-guidance-retrieval/blob/982aa11494f04dee16cacf18ae1fbf59f6669845/README.md",
+  "splits": [
+    "test"
+  ],
+  "expected_counts": {
+    "documents": 105,
+    "queries": 112
+  },
+  "files": [
+    "corpus.jsonl",
+    "queries.jsonl",
+    "default.jsonl"
+  ],
+  "file_sha256": {},
+  "acquisition_allowed": true,
+  "unresolved_flags": [
+    "judgment_completeness_not_asserted"
+  ],
+  "label_semantics": "source score, positive if >0",
+  "text_policy": "native boundaries; unmodified source text; no chunking"
+}

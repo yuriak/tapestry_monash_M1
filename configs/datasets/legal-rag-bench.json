@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "dataset_id": "au-legal-rag-bench",
+  "collection_id": "au-legal-rag-bench-native",
+  "adapter": "legal_rag_bench",
+  "repo_id": "isaacus/legal-rag-bench",
+  "revision": "db0b31dc6d195ce9916897e1ac5e4e6209736c8a",
+  "canonical_url": "https://huggingface.co/datasets/isaacus/legal-rag-bench",
+  "node": "AU",
+  "jurisdiction": "Australia",
+  "intended_use": "Victorian Criminal Charge Book retrieval evaluation",
+  "access_type": "public",
+  "license": "cc-by-nc-sa-4.0 card tag; cc-by-nc-4.0 card body",
+  "terms_url": "https://huggingface.co/datasets/isaacus/legal-rag-bench/blob/db0b31dc6d195ce9916897e1ac5e4e6209736c8a/README.md",
+  "splits": [
+    "test"
+  ],
+  "expected_counts": {
+    "documents": 4876,
+    "queries": 100
+  },
+  "files": [
+    "corpus.jsonl",
+    "qa.jsonl"
+  ],
+  "file_sha256": {},
+  "acquisition_allowed": true,
+  "unresolved_flags": [
+    "license_metadata_body_conflict",
+    "noncommercial_use_only",
+    "judgment_completeness_not_asserted"
+  ],
+  "label_semantics": "source positive passage, relevance=1",
+  "text_policy": "native boundaries; unmodified source text; no chunking"
+}

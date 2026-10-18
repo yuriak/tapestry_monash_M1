@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "dataset_id": "au-open-australian-legal-corpus",
+  "collection_id": "au-open-australian-legal-corpus-native",
+  "adapter": "open_au_corpus",
+  "repo_id": "isaacus/open-australian-legal-corpus",
+  "revision": "ef45e3fec41a960919a31149eee6dab9aa39f725",
+  "canonical_url": "https://huggingface.co/datasets/isaacus/open-australian-legal-corpus",
+  "node": "AU",
+  "jurisdiction": "Australia",
+  "intended_use": "AU retrieval source documents, no chunking decision",
+  "access_type": "public",
+  "license": "custom; corpus CC BY 4.0; underlying source-specific terms",
+  "terms_url": "https://huggingface.co/datasets/isaacus/open-australian-legal-corpus/blob/ef45e3fec41a960919a31149eee6dab9aa39f725/README.md",
+  "splits": [
+    "corpus"
+  ],
+  "expected_counts": {
+    "documents": 232560
+  },
+  "files": [
+    "corpus.jsonl"
+  ],
+  "file_sha256": {
+    "corpus.jsonl": "5abc64a3ad35a44eca65706babd63d1095c29ebebf3f5c588beb56612097b758"
+  },
+  "acquisition_allowed": true,
+  "unresolved_flags": [
+    "source_specific_copyright",
+    "card_counts_inconsistent"
+  ],
+  "label_semantics": "not evaluation qrels",
+  "text_policy": "native boundaries; unmodified source text; no chunking"
+}
