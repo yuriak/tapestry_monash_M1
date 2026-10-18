@@ -84,3 +84,5 @@ The benchmark repositories supply data rather than a standalone lightweight scor
 ## Pinned zero-shot inference
 
 Use `tapestry-m1-model preflight configs/runs/native-qwen3.json` and then `tapestry-m1-model run-native configs/runs/native-qwen3.json` inside an allocated GPU job. Both run through `./scripts/run` in the shared `.venv`. Read [inference and corpus-index instructions](docs/inference.md) before model acquisition or execution. GPU availability alone is insufficient: the CLI verifies a running Slurm GPU allocation. No site-specific scheduler account or partition is embedded here.
+
+Observed native AU results, paired intervals and truncation/resource limits are recorded in [results](docs/results.md). The reranker decreased Tax Guidance scores under the frozen recipe; Legal RAG Bench showed a small point increase with a zero-crossing interval. The full AU corpus index remains partial.
