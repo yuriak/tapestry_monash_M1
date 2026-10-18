@@ -5,12 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "tapestry-m1"
 version = "0.1.0"
-description = "Model-independent legal retrieval data contracts and CPU evaluation"
+description = "Legal retrieval data, CPU evaluation and pinned Qwen3 zero-shot inference"
 requires-python = ">=3.11,<3.12"
-dependencies = []
+dependencies = ["numpy==2.2.6", "torch==2.6.0", "transformers==4.51.3", "huggingface-hub==0.35.3", "safetensors==0.5.3"]
 
 [project.scripts]
 tapestry-m1 = "tapestry_m1.cli:main"
+tapestry-m1-model = "tapestry_m1.inference.cli:main"
 
 [dependency-groups]
 dev = ["pytest==8.4.2"]
@@ -21,3 +22,11 @@ python-preference = "only-managed"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true

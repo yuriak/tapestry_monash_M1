@@ -1,10 +1,10 @@
 # Tapestry Monash M1
 
-CPU-only legal retrieval data preparation and model-independent evaluation. This package does not run encoders, rerankers, training or model baselines. It installs independently of its coordinating repository, using only the Python standard library at runtime.
+Legal retrieval data preparation, model-independent CPU evaluation, and pinned Qwen3 zero-shot retrieval/reranking. It installs independently of its coordinating repository. Training and federation are outside the implementation scope.
 
 ## Independent Monash environment
 
-Use **uv 0.13.1** and managed **CPython 3.11.17**, with this checkout's `.venv`. No Conda installation is needed. The lock pins the CPU development dependencies; it contains no torch/CUDA dependencies. Future partner stacks should use separate environments/locks when incompatible, rather than modifying this environment implicitly.
+Use **uv 0.13.1** and managed **CPython 3.11.17**, with this checkout's `.venv`. No Conda installation is needed. Data/evaluation and inference share this one environment and `uv.lock`. The lock pins PyTorch 2.6.0 (CUDA 12.4 wheels), Transformers 4.51.3, NumPy 2.2.6 and development dependencies. Data/metric code retains standard-library implementations and model dependencies are imported only by inference paths. Future partner environments can be reviewed when introduced.
 
 Install uv from the [official 0.13.1 release](https://github.com/astral-sh/uv/releases/tag/0.13.1), checking the release checksum for your platform, and set `M1_UV_BIN` to its absolute executable path. Alternatively place its executable at `.runtime/tools/uv/uv`. For Linux x86-64, the official `uv-x86_64-unknown-linux-gnu.tar.gz` SHA-256 is `eadd9d27c134ab5ac1ffd4473b97a741407f3ea238288f03121fc4deddf90220`.
 
@@ -15,7 +15,7 @@ export M1_UV_BIN=/absolute/path/to/uv
 ./scripts/run tapestry-m1 --help
 ```
 
-The wrapper runs from the project root, clears inherited virtualenv/Conda/Python import settings, requires managed Python, and confines Python installations, package cache and temporary files to ignored `.runtime/`. `uv run --locked` creates/synchronizes `.venv` and fails on lock drift. It does not activate or reuse a cluster Conda environment. The first run needs network access to the pinned dependencies and managed interpreter. A direct `.venv/bin/python` invocation is suitable after setup. See [uv project synchronization](https://docs.astral.sh/uv/concepts/projects/sync/).
+The wrapper runs from the project root, clears inherited virtualenv/Conda/Python import settings, requires managed Python, and confines Python installations, package cache and temporary files to ignored `.runtime/`. `uv run --locked` creates/synchronizes `.venv` and fails on lock drift. It does not activate or reuse a cluster Conda environment. The first run needs network access and storage for the pinned CUDA dependencies and managed interpreter. A direct `.venv/bin/python` invocation is suitable after setup. See [uv project synchronization](https://docs.astral.sh/uv/concepts/projects/sync/).
 
 ## Data sources
 
@@ -79,4 +79,8 @@ Metrics use exponential gain `2^relevance-1` (or explicit `--gain linear`), log2
 
 Results retain per-query metrics, macro summaries per dataset/split/collection, run/seed/model/index/config identity and artifact hashes. Comparisons require identical benchmark inputs, metric definitions and exact query identities; query pairs are resampled together, producing B-A deltas and percentile 95% intervals. These intervals describe conditional query-sampling uncertainty, not variation across training seeds. Keep each experiment seed in its own ranking and evaluation artifact; aggregation across three runs remains a later protocol decision.
 
-No official model scores are reproduced. CPU synthetic checks validate these declared metric definitions; the pinned benchmark repositories supply data rather than a standalone lightweight official scoring routine. No MTEB/model stack has been installed for an official cross-check.
+The benchmark repositories supply data rather than a standalone lightweight scoring routine. Synthetic checks validate declared metric definitions. A separate reference-backend check used pytrec-eval-terrier: binary metrics and explicitly linear graded gain agree on 200 synthetic rankings. Default exponential graded gain and supplied-list ties must not be presented as protocol-identical to different leaderboard conventions. See [zero-shot inference](docs/inference.md) for model execution and limits.
+
+## Pinned zero-shot inference
+
+Use `tapestry-m1-model preflight configs/runs/native-qwen3.json` and then `tapestry-m1-model run-native configs/runs/native-qwen3.json` inside an allocated GPU job. Both run through `./scripts/run` in the shared `.venv`. Read [inference and corpus-index instructions](docs/inference.md) before model acquisition or execution. GPU availability alone is insufficient: the CLI verifies a running Slurm GPU allocation. No site-specific scheduler account or partition is embedded here.

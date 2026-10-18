@@ -16,5 +16,10 @@ export UV_PYTHON_INSTALL_DIR="$project_root/.runtime/python"
 export UV_CACHE_DIR="$project_root/.runtime/cache/uv"
 export UV_PROJECT_ENVIRONMENT="$project_root/.venv"
 export TMPDIR="$project_root/.runtime/tmp"
+export HF_HOME="$project_root/.runtime/cache/huggingface"
+export TORCH_HOME="$project_root/.runtime/cache/torch"
+export XDG_CACHE_HOME="$project_root/.runtime/cache/xdg"
+export HF_HUB_DISABLE_IMPLICIT_TOKEN=1
+export TOKENIZERS_PARALLELISM=false
 mkdir -p "$TMPDIR"
 exec "$uv_bin" run --locked --managed-python "$@"
