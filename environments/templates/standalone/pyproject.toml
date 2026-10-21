@@ -1,0 +1,10 @@
+# Copy to a named stack, review requirements/Python, and lock before execution.
+[project]
+name = "replace-with-reviewed-stack"
+version = "0.0.0"
+requires-python = ">=3.11,<3.12"
+dependencies = []
+
+[tool.uv]
+package = false
+python-preference = "only-managed"

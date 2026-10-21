@@ -4,22 +4,61 @@ project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$project_root"
 uv_bin="${M1_UV_BIN:-$project_root/.runtime/tools/uv/uv}"
 if [[ ! -x "$uv_bin" ]]; then
-  printf '%s\n' 'Install uv 0.13.1 or set M1_UV_BIN to its executable; see README.' >&2
+  printf '%s\n' 'Install uv 0.13.1 or set M1_UV_BIN; see docs/environments/README.md.' >&2
   exit 2
 fi
 if [[ "$("$uv_bin" --version)" != 'uv 0.13.1'* ]]; then
-  printf '%s\n' 'This environment requires uv 0.13.1.' >&2
+  printf '%s\n' 'This checkout requires uv 0.13.1.' >&2
+  exit 2
+fi
+selected_env="${M1_ENVIRONMENT:-shared}"
+if [[ "${1:-}" == '--environment' ]]; then
+  if [[ $# -lt 2 ]]; then printf '%s\n' 'Missing environment name.' >&2; exit 2; fi
+  selected_env="$2"
+  shift 2
+fi
+if [[ ! "$selected_env" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]]; then
+  printf '%s\n' 'Invalid environment name.' >&2
   exit 2
 fi
 unset VIRTUAL_ENV CONDA_PREFIX CONDA_DEFAULT_ENV PYTHONPATH PYTHONHOME
 export UV_PYTHON_INSTALL_DIR="$project_root/.runtime/python"
 export UV_CACHE_DIR="$project_root/.runtime/cache/uv"
-export UV_PROJECT_ENVIRONMENT="$project_root/.venv"
 export TMPDIR="$project_root/.runtime/tmp"
 export HF_HOME="$project_root/.runtime/cache/huggingface"
 export TORCH_HOME="$project_root/.runtime/cache/torch"
 export XDG_CACHE_HOME="$project_root/.runtime/cache/xdg"
 export HF_HUB_DISABLE_IMPLICIT_TOKEN=1
 export TOKENIZERS_PARALLELISM=false
+export PYTHONPATH="$project_root/src"
+export M1_ENVIRONMENT="$selected_env"
+uv_args=(run --locked --managed-python)
+case "$selected_env" in
+  shared)
+    export UV_PROJECT_ENVIRONMENT="$project_root/.venv"
+    export M1_ENVIRONMENT_LOCK="$project_root/uv.lock"
+    ;;
+  cpu)
+    export UV_PROJECT_ENVIRONMENT="$project_root/.venvs/cpu"
+    export M1_ENVIRONMENT_LOCK="$project_root/uv.lock"
+    uv_args+=(--no-default-groups --group dev)
+    ;;
+  *)
+    env_root="$project_root/environments/$selected_env"
+    if [[ ! -f "$env_root/pyproject.toml" || ! -f "$env_root/uv.lock" ]]; then
+      printf '%s\n' 'Independent environment needs its own reviewed pyproject.toml and uv.lock; see environments/README.md.' >&2
+      exit 2
+    fi
+    export UV_PROJECT_ENVIRONMENT="$project_root/.venvs/$selected_env"
+    export M1_ENVIRONMENT_LOCK="$env_root/uv.lock"
+    uv_args+=(--project "$env_root")
+    ;;
+esac
 mkdir -p "$TMPDIR"
-exec "$uv_bin" run --locked --managed-python "$@"
+if [[ $# -eq 0 ]]; then set -- python -m tapestry_m1 --help; fi
+case "$1" in
+  data|evaluation|models|benchmark|corpus|gateway|--help|-h)
+    set -- python -m tapestry_m1 "$@"
+    ;;
+esac
+exec "$uv_bin" "${uv_args[@]}" "$@"

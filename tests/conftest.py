@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 import pytest
-from tapestry_m1.io import dumps
+from tapestry_m1.core.io import dumps
 
 
 def write_rows(path, rows):
@@ -12,12 +12,12 @@ def write_rows(path, rows):
 def benchmark(tmp_path):
     root=tmp_path/"benchmark";root.mkdir()
     for name in ["documents", "queries", "qrels"]:
-        (root/(name+".jsonl")).write_bytes((Path(__file__).parent/"fixtures"/(name+".jsonl")).read_bytes())
+        (root/(name+".jsonl")).write_bytes((Path(__file__).parent/"fixtures"/"benchmark"/(name+".jsonl")).read_bytes())
     return root
 
 
 @pytest.fixture
 def rankings(tmp_path):
     path=tmp_path/"rankings.jsonl"
-    path.write_bytes((Path(__file__).parent/"fixtures/rankings.jsonl").read_bytes())
+    path.write_bytes((Path(__file__).parent/"fixtures/benchmark/rankings.jsonl").read_bytes())
     return path

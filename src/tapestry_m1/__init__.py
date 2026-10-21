@@ -1,2 +1,1 @@
-"""Model-independent, model-independent M1 data and evaluation tools."""
-__version__ = "0.1.0"
+"""Sovereign Evidence Assistant component library, run directly from this checkout."""

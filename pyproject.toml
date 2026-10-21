@@ -1,26 +1,25 @@
-[build-system]
-requires = ["hatchling==1.27.0"]
-build-backend = "hatchling.build"
-
 [project]
 name = "tapestry-m1"
 version = "0.1.0"
-description = "Legal retrieval data, CPU evaluation and pinned Qwen3 zero-shot inference"
+description = "Sovereign Evidence Assistant: modular medicine and law research stack"
 requires-python = ">=3.11,<3.12"
-dependencies = ["numpy==2.2.6", "torch==2.6.0", "transformers==4.51.3", "huggingface-hub==0.35.3", "safetensors==0.5.3"]
+dependencies = []
 
-[project.scripts]
-tapestry-m1 = "tapestry_m1.cli:main"
-tapestry-m1-model = "tapestry_m1.inference.cli:main"
-
+# This is a source checkout, not an installable distribution.
 [dependency-groups]
 dev = ["pytest==8.4.2"]
+model-runtime = ["numpy==2.2.6", "torch==2.6.0", "transformers==4.51.3", "huggingface-hub==0.35.3", "safetensors==0.5.3"]
+retrieval = [{include-group = "model-runtime"}]
+reranker = [{include-group = "model-runtime"}]
 
 [tool.uv]
+package = false
 python-preference = "only-managed"
+default-groups = ["dev", "retrieval", "reranker"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 addopts = "-ra"
 
 [tool.uv.sources]

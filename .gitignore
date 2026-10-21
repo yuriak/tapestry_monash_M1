@@ -12,3 +12,10 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Independent stacks keep only declarative config/locks/docs in Git.
+/environments/**/.venv/
+/environments/**/.runtime/
+
+# Editor/notebook autosave snapshots are local workspace state.
+.ipynb_checkpoints/

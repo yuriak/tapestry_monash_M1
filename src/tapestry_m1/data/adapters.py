@@ -5,9 +5,9 @@ import os
 from pathlib import Path
 import shutil
 import tempfile
-from tapestry_m1.data.schema import identifier, number, text
+from tapestry_m1.contracts.records import identifier, number, text
 from tapestry_m1.data.validation import validate
-from tapestry_m1.io import ContractError, atomic_json, dumps, fingerprint, records
+from tapestry_m1.core.io import ContractError, atomic_json, dumps, fingerprint, records
 
 FILES = ["documents.jsonl", "queries.jsonl", "qrels.jsonl", "training_pairs.jsonl"]
 

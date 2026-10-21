@@ -5,7 +5,7 @@ import os
 import re
 from pathlib import Path
 import urllib.request
-from tapestry_m1.io import ContractError, atomic_json, fingerprint
+from tapestry_m1.core.io import ContractError, atomic_json, fingerprint
 
 
 def utc_now():

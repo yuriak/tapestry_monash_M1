@@ -4,8 +4,8 @@ import hashlib
 from pathlib import Path
 import sqlite3
 import tempfile
-from tapestry_m1.data import schema
-from tapestry_m1.io import ContractError, records, text_key
+from tapestry_m1.contracts import records as schema
+from tapestry_m1.core.io import ContractError, records, text_key
 
 
 def build_index(root, db):

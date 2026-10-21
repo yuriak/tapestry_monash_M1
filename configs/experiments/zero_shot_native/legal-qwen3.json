@@ -1,0 +1,21 @@
+{
+  "encoder": "../../retrieval/qwen3-embedding-4b.json",
+  "reranker": "../../reranker/qwen3-reranker-0.6b.json",
+  "dtype": "bfloat16",
+  "attention_backend": "sdpa",
+  "max_tokens": 8192,
+  "embedding_batch": 8,
+  "reranker_batch": 16,
+  "embedding_shard": 32,
+  "dimension": 2560,
+  "top_k": 100,
+  "instruction": "Given a web search query, retrieve relevant passages that answer the query",
+  "preflight_embedding_cosine_distance": 0.001,
+  "preflight_reranker_absolute_error": 0.02,
+  "bootstrap_seed": 20261018,
+  "bootstrap_resamples": 10000,
+  "datasets": [
+    "../../data/sources/legal-rag-bench.json"
+  ],
+  "environment_lock": "../../../uv.lock"
+}

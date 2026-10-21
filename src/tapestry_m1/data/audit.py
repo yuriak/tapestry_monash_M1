@@ -3,7 +3,7 @@ from collections import Counter
 from pathlib import Path
 import hashlib
 from urllib.parse import urlsplit, urlunsplit
-from tapestry_m1.io import records, text_key, fingerprint, ContractError
+from tapestry_m1.core.io import records, text_key, fingerprint, ContractError
 
 
 def canonical_url(url):
