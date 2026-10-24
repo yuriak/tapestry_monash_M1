@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+exec "$project_root/scripts/run" --environment cpu python -m tapestry_m1.data.global_acquisition \
+  --manifest "$project_root/configs/data/acquisition/global_batch1.json" "$@"

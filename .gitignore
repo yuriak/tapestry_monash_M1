@@ -19,3 +19,6 @@ dist/
 
 # Editor/notebook autosave snapshots are local workspace state.
 .ipynb_checkpoints/
+
+# User-managed external dataset mount; never publish its absolute target.
+/nfs_data

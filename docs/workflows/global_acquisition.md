@@ -1,0 +1,41 @@
+# Global source acquisition
+
+Use the existing CPU uv profile; the transport is Python standard library code and needs no GPU, Conda, new dependencies or project installation. Run from any working directory by supplying the script path. Choose an external or ignored root explicitly:
+
+```bash
+scripts/download_global_batch1 --data-root /path/to/global --plan
+scripts/download_global_batch2 --data-root /path/to/global --plan
+scripts/download_global_batch1 --data-root /path/to/global
+scripts/download_global_batch2 --data-root /path/to/global
+```
+
+Run Batch 1 before Batch 2. `--plan` is offline and creates no storage. Transfers start only without `--plan`. Each script accepts `--workers 4` (default, maximum 16) and `--attempts 5`. Repeating a command resumes interrupted files, checks existing files and retries missing work. Do not edit a pinned manifest while a transfer is running. A root-wide nonblocking lock prevents competing writers. Ctrl-C cancels queued transfers and preserves active partial files; an in-flight network read may take up to the 120-second socket timeout to stop.
+
+Files live under `raw/<dataset>/<revision>/<native-path>` or `evaluation/<dataset>/<revision>/<native-path>`. `prepared/` is reserved. Source manifests and per-file status/checksums are in `manifests/<dataset>/<revision>/`; `manifests/catalog.json` combines both batches. The catalog is refreshed after each dataset; the per-dataset status is refreshed after every finished file. `.part` and identity sidecars live beside the future final file. No Hugging Face cache or duplicate snapshot is created. Portable scripts print progress; site wrappers may capture it under `logs/`.
+
+Every final file has a local SHA-256 and byte count, checked against upstream LFS SHA-256 or Git blob SHA-1 where available. JSONL line counts are reported without changing text. ZIP inputs have member CRC checks. Files are finalized by atomic rename after checks. Subsequent runs rehash completed files before reuse, so a repeated run may spend time scanning the large corpus. Corrupt pinned partials are retained as `.part.corrupt.<timestamp>` and a bounded clean retry follows; do not delete them until their provenance has been reviewed. Foreign or unidentified local files are preserved and reported for manual review.
+
+Resume uses HTTP Range and If-Range with a strong ETag or Last-Modified when present. Immutable hashed files can resume without HTTP validators. If Range is ignored, a matching release is restarted safely rather than appended. Mutable archives without an upstream digest require unchanged HTTP validators for resume. A changed validator or missing validator stops that file for review. Archives from fixed author release/Drive IDs are frozen locally by their first downloaded SHA-256; this is **not** an upstream published checksum or proof that the URL is immutable. HTTP login/HTML pages are rejected, never saved as verified datasets. A Drive confirmation/access change becomes `blocked_access`; resolve access through the official source before retrying, never substitute a mirror.
+
+## Batch 1 selection and boundaries
+
+The pinned [manifest](../../configs/data/acquisition/global_batch1.json) contains eight source entries representing six resource groups:
+
+- LegalBench-RAG: **one** author Dropbox bundle, not four reconstructed original collections. Currently `blocked_rights`: PrivacyQA's original LICENSE is software boilerplate and does not clearly cover policy text or this derived bundle. The upstream LegalBench attribution of MIT alone does not resolve that question. No replacement corpus is downloaded. Author README metadata is recorded in the config.
+- PubMedQA: only official Drive object `15v1x6aQDlZymaHGP7cZJZZYFfeJt2NdS`, supplied filename `ori_pqaa.json`, PQA-A artificial training role. No PQA-L/PQA-U is requested. Validation checks the first PMID record with bounded memory and hashes all bytes; it does not fully parse or count the 533 MB JSON object or invent splits.
+- Evidence Inference: the official `v2.0.tar.gz` linked by the author download page, with author repository revision recorded separately. This is not a substitution of the older GitHub annotations. Native prompts, annotations, text and train/dev/test paths stay in a single evaluation-quarantined archive. Member names are inventoried, not extracted or transformed. No additional PMC full texts are fetched. Per-article rights still apply to bundled text.
+- MIRAGE: the medical benchmark's official `benchmark.json`, README and public-domain notice only; no predictions, raw component collections or precomputed retrieval results.
+- LegalBench: 63 selected tasks, 126 native train/test TSV files from the author-linked Hugging Face distribution, plus pinned GitHub task documentation. Requested `opp_115_*` maps to actual `opp115_*` names. Per-task licensing remains authoritative. The two `privacy_policy_qa` TSVs are individually `blocked_rights` for the same original licence ambiguity; other files proceed. **All** TSVs remain in evaluation quarantine, including `train.tsv` few-shot examples and tasks built from original test data. OPP-115 is research/noncommercial, not unrestricted commercial data.
+- Housing Statute QA: official questions/test archive and full candidate statutes archive, avoiding duplicate uncompressed exports and `questions_aux` without statute judgements. Bar Exam QA: full author candidate-passage archive plus native train/validation/test QA CSVs. The separately identified MTEB derivative contains only 116 gold passages, 117 queries and test judgements; it is not the full candidate corpus. Its card describes prompt/question concatenation. No new MTEB conversion is performed.
+
+Original archives are retained without extraction. Evaluation labels are stored physically under `evaluation/`, never copied into retrieval raw inputs. Housing/Bar archives under `raw/` contain only the selected candidate statute/passage collections. Evidence Inference is quarantined in full because its archive mixes splits, annotations and article text. A future preparation step must respect its original paths and splits.
+
+## Batch 2 selection
+
+The [manifest](../../configs/data/acquisition/global_batch2.json) pins `MedRAG/pubmed` at `33da3593d5756bc04c8909f170003c0b14197957`: **all 1,166 `chunk/*.jsonl` files**, **70,007,692,549 source bytes**, plus the 2,560-byte author README. Every shard has an upstream LFS SHA-256 or Git blob hash. The only other listed file is `.gitattributes`, excluded and listed in the selection record. No indices, embeddings, models, PMC, LawInstruct, MultiLegalPile or JudicialMind are selected. These are index-only native snippets, with identifiers and text unchanged; no training permission or redistribution clearance is inferred. See [NLM downloading/copyright information](https://www.nlm.nih.gov/databases/download.html).
+
+## Reading results
+
+`downloaded_verified` means the selected source files passed the stated byte/hash/format checks; it does not imply training rights, normalized joins or retrieval readiness. `partial` includes successful subsets, interrupted/transient failures and individual blocked components. `blocked_access`, `blocked_rights` and `not_found` must be reported separately, never as downloaded. Dataset state becomes verified only when every selected file is verified. The catalog retains source URL, version, rights, per-file role/split, relative placement, byte/hash and next action. For mixed or derivative resources, consult `source.json` for archive ID, transformation description and native-split boundaries.
+
+Exit 2 indicates partial/error work or a competing writer. Exit 0 allows explicitly recorded whole-source rights/access exceptions; it is not an assertion that every named source exists locally. Inspect the catalog and per-file states after every run. An unavailable source never cancels unrelated accessible datasets. Interrupted active-dataset status can be read from its own `status.json`; rerun the same command to reconcile the aggregate catalog. No actual source dataset was downloaded when preparing these scripts; live transport and native archive structures are only validated on the user's first run.
