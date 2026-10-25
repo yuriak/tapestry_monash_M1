@@ -232,3 +232,28 @@ def test_cancelled_transfer_never_starts_http(source, tmp_path):
     with pytest.raises(ContractError, match='interrupted'):
         transfer(item, tmp_path / 'cancelled', item, stop_event=stop)
     assert not state['requests']
+
+
+@pytest.mark.parametrize('pin', ['sha256', 'git_blob_sha1'])
+def test_pinned_empty_source_needs_no_network(tmp_path, monkeypatch, pin):
+    def forbidden(*args, **kwargs):
+        raise AssertionError('empty pinned file must not make an HTTP request')
+    monkeypatch.setattr('urllib.request.urlopen', forbidden)
+    item = {'url': 'https://example.org/immutable-empty', 'bytes': 0,
+            pin: hashlib.sha256(b'').hexdigest() if pin == 'sha256' else hashlib.sha1(b'blob 0\0').hexdigest()}
+    dest = tmp_path / 'empty.jsonl'
+    receipt = transfer(item, dest, item)
+    assert dest.read_bytes() == b''
+    assert receipt['line_count'] == 0
+    assert receipt['upstream_checksum_verified']
+    assert receipt['materialization'] == 'verified_pinned_empty_blob_no_network'
+    assert transfer(item, dest, item)['cache_reused']
+
+
+def test_unpinned_or_incorrect_empty_source_is_not_published(tmp_path):
+    for pin in [{}, {'git_blob_sha1': '0' * 40}]:
+        item = {'url': 'https://example.org/empty', 'bytes': 0, **pin}
+        dest = tmp_path / ('wrong' if pin else 'unpinned')
+        with pytest.raises(ContractError):
+            transfer(item, dest, item, attempts=1)
+        assert not dest.exists()

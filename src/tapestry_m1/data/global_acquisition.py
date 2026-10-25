@@ -157,8 +157,8 @@ def transfer(item, destination, identity, attempts=5, retry_delay=2, stop_event=
         raise ContractError('partial source identity changed')
     write_json(sidecar, state)
     pinned = bool(item.get('sha256') or item.get('git_blob_sha1'))
-    limit = item.get('bytes') or item.get('max_bytes')
-    if not limit or limit <= 0:
+    limit = item.get('bytes') if item.get('bytes') is not None else item.get('max_bytes')
+    if type(limit) is not int or limit < 0 or (limit == 0 and not pinned):
         raise ContractError('file size or explicit byte ceiling required')
     for attempt in range(attempts):
         if stop_event is not None and stop_event.is_set():
@@ -167,8 +167,12 @@ def transfer(item, destination, identity, attempts=5, retry_delay=2, stop_event=
             offset = partial.stat().st_size if partial.exists() else 0
             if offset > limit:
                 raise ContractError('partial exceeds source size ceiling')
+            # A pinned empty blob is exactly known; no network body is needed.
+            if limit == 0 and not partial.exists():
+                with partial.open('xb'):
+                    pass
             # A full interrupted part can be verified without issuing a Range at EOF.
-            if not (offset and offset == (item.get('bytes') or state.get('total'))):
+            if limit != 0 and not (offset and offset == (item.get('bytes') or state.get('total'))):
                 headers = {'User-Agent': 'tapestry-m1-acquisition/1', 'Accept-Encoding': 'identity'}
                 validator = state.get('etag') or state.get('last_modified')
                 if offset:
@@ -224,6 +228,8 @@ def transfer(item, destination, identity, attempts=5, retry_delay=2, stop_event=
                               'source_url': item['url'], 'etag': state.get('etag'),
                               'last_modified': state.get('last_modified'),
                               'upstream_checksum_verified': pinned, 'resumed_bytes': offset}
+            if limit == 0:
+                saved['materialization'] = 'verified_pinned_empty_blob_no_network'
             # Store receipt first so a crash after atomic rename is recoverable.
             write_json(receipt, saved)
             os.replace(partial, destination)
