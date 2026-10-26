@@ -15,3 +15,5 @@ Query + fixed eligible candidates + model config -> scores/reordered candidates 
 M1.1 extensions include pooled/local/cross-node recipes, shared/local heads, calibration, jurisdiction mixtures and abstract relevance distillation. Introduce each as a reviewed backend/method, keep training separate from score/evaluation contracts. Retrieval is supplied by its owning component.
 
 See [architecture](../architecture/overview.md), [contracts](../contracts/data.md) and the [component index](README.md).
+
+Frozen base-reranker [hard-negative selection](../contracts/reranker_hard.md) keeps query/positive/random identities fixed and feeds the standard single-L0 trainer. Failure analysis is maintained independently in research.

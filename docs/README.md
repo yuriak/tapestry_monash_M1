@@ -11,3 +11,5 @@ The [project README](../README.md) introduces the full programme. This index sep
 - Configuration: [component/source/experiment conventions](../configs/README.md).
 
 Add documentation under the owning category. A new component guide identifies its public inputs, outputs, dependencies, implementation status and validation limits. Cross-component commands belong in workflows. Keep site-private coordination and internal instructions outside this standalone repository.
+
+- [Base-reranker hard-negative training arm](contracts/reranker_hard.md)
