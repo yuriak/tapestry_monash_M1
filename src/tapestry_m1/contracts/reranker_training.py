@@ -13,7 +13,7 @@ def text_hash(value):
 
 
 def validate_groups(groups, *, synthetic_only=False):
-    queries, texts, documents = {}, {}, {}
+    queries, source_queries, texts, documents, candidate_identities = {}, {}, {}, {}, {}
     for group in groups:
         if group.get('schema_version') != SCHEMA:
             raise ContractError('unsupported training group schema')
@@ -32,6 +32,10 @@ def validate_groups(groups, *, synthetic_only=False):
         if key in queries:
             raise ContractError('duplicate query identity')
         queries[key] = group['split']
+        source_key = (group['collection_id'], group['source_query_id'])
+        if source_key in source_queries and source_queries[source_key] != group['split']:
+            raise ContractError('original query identity leaks across splits')
+        source_queries[source_key] = group['split']
         normalized = text_key(group['query_text'])
         if normalized in texts and texts[normalized] != group['split']:
             raise ContractError('query text leaks across splits')
@@ -43,6 +47,8 @@ def validate_groups(groups, *, synthetic_only=False):
             raise ContractError('candidate order must be positive/random/hard/hard')
         if [c.get('negative_kind') for c in candidates] != ['positive', 'random', 'hard', 'hard']:
             raise ContractError('negative kinds must be positive/random/hard/hard')
+        if candidates[0].get('doc_id') not in group.get('known_relevant_ids', []):
+            raise ContractError('known-positive exclusion set must include the positive')
         ids = set()
         for candidate in candidates:
             for name in ('doc_id', 'source_doc_id', 'text', 'supervision'):
@@ -51,6 +57,11 @@ def validate_groups(groups, *, synthetic_only=False):
             if candidate['doc_id'] in ids:
                 raise ContractError('duplicate candidate')
             ids.add(candidate['doc_id'])
+            doc_key = (group['collection_id'], candidate['doc_id'])
+            doc_identity = (candidate['source_doc_id'], candidate.get('source_hash'))
+            if doc_key in candidate_identities and candidate_identities[doc_key] != doc_identity:
+                raise ContractError('candidate identity has inconsistent source/text')
+            candidate_identities[doc_key] = doc_identity
             if candidate.get('source_hash') != text_hash(candidate['text']):
                 raise ContractError('candidate text hash mismatch')
             if candidate.get('ambiguous') is not False:
@@ -74,7 +85,7 @@ def select_negatives(pool, ranking, known_relevant, seed):
     if len(ids) != len(set(ids)):
         raise ContractError('duplicate candidate pool IDs')
     permitted = {c['doc_id']: c for c in pool if c.get('split') == 'train' and c.get('relevance') == 0
-                 and c.get('judged') is True and c['doc_id'] not in known_relevant}
+                 and c.get('judged') is True and c.get('ambiguous', False) is False and type(c.get('relevance')) in (int, float) and c['doc_id'] not in known_relevant}
     hard = list(dict.fromkeys(d for d in ranking['doc_ids'] if d in permitted))[:2]
     remaining = sorted(set(permitted) - set(hard))
     if len(hard) != 2 or not remaining:

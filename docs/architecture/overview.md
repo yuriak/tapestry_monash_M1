@@ -9,7 +9,7 @@ The source is one modular Python tree executed from the checkout. Modules are or
 | `data` | Source adapters/acquisition, normalization, source verification, overlap/length audits and token-window chunk preparation | Model ranking, generation or experiment orchestration |
 | `runtime` | Pinned model acquisition/verification, config resolution, lazy local model loading, implementation fingerprint and device guard | Corpus policy, ranking decisions or complete experiments |
 | `retrieval` | Encoder backend, vector caches/encoding, index build and exact search | Reranking or generation |
-| `reranker` | Reranker backend, candidate-preserving ordering and rank lineage | Retrieval/index construction or complete experiments |
+| `reranker` | Reranker backend, candidate-preserving ordering, local group losses/LoRA trainer and rank lineage | Retrieval/index construction or complete experiments |
 | `gateway` | Bounded batch validation/transport | Rewriting or privacy guarantees |
 | `abstractor` | Future query/evidence translation and controlled rewriting | Batch transport or generator training |
 | `generator` | Future generation, serving/training adapters, experts/router | Dataset acquisition or federation server policy |
@@ -24,3 +24,5 @@ The Qwen3 encoder and reranker have separate classes in their respective compone
 Configuration does not define Python import boundaries. Experiment configs explicitly reference component and source configs; runtime resolution records actual selected environment lock identity. Data references and qrels retain collection/split provenance across workflows.
 
 Extension areas are documented for abstractor, generator, federation and later evaluation. Their directory presence is not an implementation or acceptance claim. New work adds only the interfaces and dependencies justified by its own experiment.
+
+Local training shares the existing reranker serialization and runtime assets; framework-independent group validation/reference math live under `contracts`, restartable group order and adapter/loss logic under `reranker`, checkpoint/RNG persistence under `runtime`, and the source CLI under `workflows`. Site allocation scripts and raw runtime artifacts are operator-owned, outside published source.

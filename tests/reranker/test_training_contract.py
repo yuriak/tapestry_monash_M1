@@ -81,3 +81,16 @@ def test_training_serialization_and_suffix_preserving_truncation_without_gpu():
     assert first['serialized_text']==PREFIX+reranker_text('Given a web search query, retrieve relevant passages that answer the query',groups[0]['query_text'],groups[0]['candidates'][0]['text'])+SUFFIX
     assert first['input_ids'][:len(serialization['prefix_ids'])]==serialization['prefix_ids']
     assert first['input_ids'][-len(serialization['suffix_ids']):]==serialization['suffix_ids']
+
+
+
+def test_original_query_identity_and_candidate_content_cannot_drift():
+    groups=list(records(FIXTURE/'groups.jsonl'))
+    groups[-1]['source_query_id']=groups[0]['source_query_id']
+    with pytest.raises(ContractError,match='original query identity'):validate_groups(groups)
+    groups=list(records(FIXTURE/'groups.jsonl'))
+    groups[1]['candidates'][0]['doc_id']=groups[0]['candidates'][0]['doc_id']
+    groups[1]['known_relevant_ids']=[groups[1]['candidates'][0]['doc_id']]
+    with pytest.raises(ContractError,match='inconsistent source/text'):validate_groups(groups)
+    groups=list(records(FIXTURE/'groups.jsonl'));groups[0]['known_relevant_ids']=[]
+    with pytest.raises(ContractError,match='known-positive'):validate_groups(groups)

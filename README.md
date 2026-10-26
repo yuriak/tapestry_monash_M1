@@ -22,7 +22,7 @@ The programme progresses through three milestones:
 |---|---|---|
 | Data | Acquisition, normalization, source identity, split integrity, overlap/length audits and chunking | Available for the initial AU sources |
 | Retrieval | Embeddings, vector caching, index construction and search | Qwen3 encoder, sharded exact-search index |
-| Reranker | Candidate scoring, rank lineage, future training/personalization | Qwen3 0.6B zero-shot backend and candidate-preserving ordering |
+| Reranker | Candidate scoring, rank lineage, local training and future personalization | Qwen3 0.6B zero-shot backend, gated synthetic L0/L1 LoRA and checkpoint/resume |
 | Gateway | Versioned batch I/O and evidence-boundary validation | Local L0 identity adapter; no privacy protection |
 | Abstractor | Input translation and controlled query/evidence rewriting | Planned; L1–L3 algorithms not implemented |
 | Generator | Cited generation, LoRA adaptation, shared/local experts and routing | Planned integration surface |
@@ -31,7 +31,7 @@ The programme progresses through three milestones:
 | Core / contracts / runtime | Shared records, artifacts, model assets and execution checks | Available; model imports are lazy |
 | Workflows | Compose components into explicit, bounded execution flows | Initial data, native benchmark and corpus flows |
 
-Current work is an initial implementation, not completion of the whole programme. Two native AU zero-shot baselines have historical recorded results; the full AU chunk index remains partial. Reranker training, generators, abstraction algorithms and federated experiments remain later work. See the [implementation map](docs/components/README.md) and [recorded initial results](docs/experiments/zero_shot_native/results.md).
+Current work is an initial implementation, not completion of the whole programme. Two native AU zero-shot baselines have historical recorded results; the full AU chunk index remains partial. A local synthetic reranker LoRA warmup is available with a [portable training contract](docs/contracts/reranker_training.md); real-data adaptation remains gated. Generators, abstraction algorithms and federated experiments remain later work. See the [implementation map](docs/components/README.md) and [recorded initial results](docs/experiments/zero_shot_native/results.md).
 
 ## Repository organization
 
