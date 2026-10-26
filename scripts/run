@@ -57,7 +57,7 @@ esac
 mkdir -p "$TMPDIR"
 if [[ $# -eq 0 ]]; then set -- python -m tapestry_m1 --help; fi
 case "$1" in
-  data|evaluation|models|benchmark|corpus|gateway|--help|-h)
+  data|evaluation|models|benchmark|corpus|gateway|training|--help|-h)
     set -- python -m tapestry_m1 "$@"
     ;;
 esac

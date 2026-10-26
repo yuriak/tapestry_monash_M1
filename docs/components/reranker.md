@@ -1,10 +1,10 @@
 # Reranker
 
-Available: Qwen3 0.6B zero-shot scorer, candidate-preserving ordering and rank lineage. Training/personalization remain planned.
+Available: Qwen3 0.6B zero-shot scorer, candidate-preserving ordering and rank lineage. Local synthetic LoRA warmup supports L0/L1 and immutable checkpoint/resume; real-data training remains gated. See the [portable training contract](../contracts/reranker_training.md).
 
 ## Ownership
 
-`reranker/qwen3.py`, `ranking.py`.
+`reranker/qwen3.py`, `ranking.py`; training owns `losses.py`, `lora.py`, `batches.py`, `training.py`. The workflow CLI composes this component; runtime owns checkpoint I/O.
 
 ## Input/output boundary
 
