@@ -16,6 +16,7 @@ def main(argv=None):
     train.add_argument('config', type=Path)
     train.add_argument('--data-root', type=Path, required=True)
     train.add_argument('--output', type=Path, required=True)
+    train.add_argument('--groups-root', type=Path)
     train.add_argument('--objective', choices=['L0', 'L1'])
     train.add_argument('--resume', type=Path)
     train.add_argument('--stop-after', type=int)
@@ -35,8 +36,8 @@ def main(argv=None):
                     raise ContractError('fixture gradients differ')
                 output[objective] = observed
             print(json.dumps(output,indent=2)); return 0
-        from tapestry_m1.reranker.training import run
-        run(args.config,args.data_root,args.output,objective=args.objective,resume=args.resume,
+        from tapestry_m1.reranker.peft_training import run
+        run(args.config,args.data_root,args.output,groups_root=args.groups_root,objective=args.objective,resume=args.resume,
             stop_after=args.stop_after,preflight=args.preflight)
         return 0
     except (ContractError, OSError, ValueError) as exc:

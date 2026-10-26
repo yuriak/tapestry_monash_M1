@@ -1,4 +1,6 @@
-"""Small native PyTorch LoRA backend; no dependency or base-checkpoint upgrades."""
+"""Historical native-v1 adapter reader/test implementation; not an active backend.
+Existing v1 artifacts remain native Torch; no conversion to PEFT is implied.
+"""
 import math
 import torch
 from tapestry_m1.core.io import ContractError

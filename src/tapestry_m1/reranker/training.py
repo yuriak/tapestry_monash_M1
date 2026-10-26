@@ -1,4 +1,6 @@
-"""Allocated local LoRA training on gated, fixed four-candidate query groups."""
+"""Historical native v1 trainer/helpers; active CLI uses peft_training instead.
+Retained for historical compatibility; see the v2 contract for new runs.
+"""
 import hashlib
 import json
 import math

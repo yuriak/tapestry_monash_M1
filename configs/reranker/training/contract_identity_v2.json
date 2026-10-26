@@ -1,0 +1,9 @@
+{
+  "contract_version": "m1.reranker.training.v2",
+  "files": {
+    "docs/contracts/reranker_training_v2.md": "42180a31fe4d38377cfe8ce1348fa1a2c4b12308de69a8e68d3187493cd9b5ce",
+    "tests/fixtures/training/groups.jsonl": "4b23192c0b622af510e5fc6a5e8f169744bb4bd816c371db65e659d00a61d707",
+    "tests/fixtures/training/expected.json": "1782b83e10eb83febfbc1f0a094a897afa694823509b3dd3cd9e91122990505a",
+    "tests/fixtures/training/serialization.json": "35729d53f3ef10da10e2b2b52991100afda20e83b2bd37a8e8513f2536255685"
+  }
+}

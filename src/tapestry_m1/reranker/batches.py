@@ -35,3 +35,13 @@ class GroupSampler:
             raise ContractError('sampler checkpoint identity mismatch')
         self.epoch, self.cursor, self.order = state['epoch'], state['cursor'], list(state['order'])
         self.generator.setstate(state['generator'])
+
+
+class EpochSampler(GroupSampler):
+    """Complete groups, no tail oversampling, checkpoint at optimizer-step boundaries."""
+    def take_batch(self,count):
+        if self.cursor==self.size:
+            self.epoch+=1;self.cursor=0;self.order=list(range(self.size));self.generator.shuffle(self.order)
+        actual=min(count,self.size-self.cursor)
+        result=self.order[self.cursor:self.cursor+actual];self.cursor+=actual
+        return result

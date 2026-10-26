@@ -1,0 +1,60 @@
+{
+  "schema_version": "m1.reranker.run.v2",
+  "model": "../qwen3-reranker-0.6b.json",
+  "synthetic_groups": "../../../tests/fixtures/training/groups.jsonl",
+  "objective": "L0",
+  "seed": 20261026,
+  "epochs": 2,
+  "max_tokens": 2048,
+  "instruction": "Given a web search query, retrieve relevant passages that answer the query",
+  "lora": {
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "targets": [
+      "q_proj",
+      "v_proj"
+    ]
+  },
+  "optimizer": {
+    "lr": 0.0001,
+    "weight_decay": 0.01
+  },
+  "effective_groups": 8,
+  "micro_groups": 1,
+  "checkpoint_every": 100,
+  "dtype": "bfloat16",
+  "attention_backend": "sdpa",
+  "margin": 1.0,
+  "margin_weight": 0.5,
+  "max_grad_norm": 1.0,
+  "selection_metric": "dev_bce",
+  "benchmarks": [
+    {
+      "dataset_id": "au-australian-tax-guidance-retrieval",
+      "normalized": "normalized/au-australian-tax-guidance-retrieval/982aa11494f04dee16cacf18ae1fbf59f6669845",
+      "frozen_ranking": "runs/native/au-australian-tax-guidance-retrieval/f1c7287540708d39cd54096e2be5d0cfa952bc50a25d6bca59a46ebca5e72249/x1_1.jsonl",
+      "frozen_sha256": "34c636938a41643a2772076f5641dcc31d5cf541174ba970d4262c5dbfe8f0de",
+      "zero_ranking": "runs/native/au-australian-tax-guidance-retrieval/f1c7287540708d39cd54096e2be5d0cfa952bc50a25d6bca59a46ebca5e72249/x1_2.jsonl",
+      "zero_sha256": "2a8f3785deeeddb0dcfc93fbbaa871367979a0cd06f920dcf586cec9e2ed03e0",
+      "benchmark_sha256": {
+        "documents.jsonl": "e8d76841f6cbadc3c19e419fcc8fff7ddb1686ee7de4f0ac2fe9ae7839d02519",
+        "queries.jsonl": "65c0091ed3bf6cd86bb67492405216ea4950cf321b2c5fe8d1c45178fb68af5f",
+        "qrels.jsonl": "c1febe404010d8bd42703bc039e8073a418ee7f98bd7fe8a3f4e22cc7da83431"
+      }
+    },
+    {
+      "dataset_id": "au-legal-rag-bench",
+      "normalized": "normalized/au-legal-rag-bench/db0b31dc6d195ce9916897e1ac5e4e6209736c8a",
+      "frozen_ranking": "runs/native/au-legal-rag-bench/b4ab1f6c399406c073c3b8c5888e478214de9aa1d414f03ba091f6f92dd02f84/x1_1.jsonl",
+      "frozen_sha256": "4709d01fd562dcb65de12646fde9f07ed516cbcbbcf32fb2d9e3f2c2ae3941bb",
+      "zero_ranking": "runs/native/au-legal-rag-bench/b4ab1f6c399406c073c3b8c5888e478214de9aa1d414f03ba091f6f92dd02f84/x1_2.jsonl",
+      "zero_sha256": "cb48946cc665ddf046254f33ccddc7126f36508e6cea23b52619d9b807406e53",
+      "benchmark_sha256": {
+        "documents.jsonl": "a5e2ac62c4ce63fd92b989bfe6372bdf43463c3c05d38231018d819a2fbe90fe",
+        "queries.jsonl": "e1e7ee54c8f30c4dde41cb1d95973b8b684906400740facf482fbfc28da864c6",
+        "qrels.jsonl": "4cda031436cfe18e8f577c799c10cce49f154a516c4e1ee22ca59bd0a714cc3a"
+      }
+    }
+  ]
+}
