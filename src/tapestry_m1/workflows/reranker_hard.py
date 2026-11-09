@@ -179,6 +179,9 @@ def preflight(config_path,data_root,ref,root):
             digest.update(name.encode());digest.update(value.detach().cpu().contiguous().view(torch.uint8).numpy().tobytes())
         initial_hashes.append(digest.hexdigest());model.close()
     if initial_hashes[0]!=initial_hashes[1]:raise ContractError('A0/A1 starting adapter weights differ')
+    # All parent backends are closed; the sequential child acquires its own lease.
+    from tapestry_m1.runtime.devices import release_execution_lock
+    release_execution_lock()
     attempts=sorted(root.glob('peft-preflight-*'));out=root/f'peft-preflight-{len(attempts):03d}'
     subprocess.run([sys.executable,'-m','tapestry_m1.workflows.reranker_training','train',str(config_path),
         '--data-root',str(data_root),'--output',str(out),'--preflight'],check=True)

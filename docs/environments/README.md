@@ -37,3 +37,14 @@ The root groups share a resolution/lock. An independent stack is deliberately no
 Local reranker LoRA uses native Torch adapter modules in the existing shared environment. No PEFT/Transformers/Torch upgrade or per-experiment environment is required. The CPU profile can validate the framework-independent training fixture; autograd/LoRA tests use the shared profile. See the [training contract](../contracts/reranker_training.md).
 
 Active local training uses pinned PEFT 0.15.2 and Accelerate 1.6.0 in the shared reranker group. Original Torch/Transformers pins are unchanged. The prior native backend paragraph describes v1 history, not the active CLI. CPU profile stays model-library-free; see [contract v2](../contracts/reranker_training_v2.md).
+
+## GPU execution authorization
+
+Slurm remains the default: execution verifies a running allocation with GPU resources.
+On an explicitly dedicated host, operators may instead set `M1_GPU_EXECUTION=exclusive`
+and `M1_GPU_LOCK_FILE` to an absolute, shared lock-file path. Every cooperating GPU
+process on that host must use the same path. The process holds a nonblocking advisory
+lock for its lifetime; competing processes fail before loading a model. This does not
+reserve hardware against unrelated software. Site launchers and host paths belong in
+operator configuration, not this repository. Sequential parent/child GPU stages release
+the parent lock only after closing its backends. Unknown execution modes are rejected.
