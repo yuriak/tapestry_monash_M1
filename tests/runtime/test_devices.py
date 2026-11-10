@@ -36,3 +36,22 @@ def test_exclusive_requires_explicit_lock(monkeypatch):
     monkeypatch.delenv("M1_GPU_LOCK_FILE", raising=False)
     with pytest.raises(ContractError, match="absolute shared lock"):
         execution_context()
+
+
+@pytest.mark.parametrize("resources,allowed", [
+    ("JobState=RUNNING AllocTRES=cpu=2,gres/gpu=1", True),
+    ("JobState=RUNNING TRES=cpu=2,gres/gpu=1", True),
+    ("JobState=PENDING TRES=cpu=2,gres/gpu=1", False),
+    ("JobState=RUNNING AllocTRES=cpu=2 TRES=gres/gpu=1", False),
+    ("JobState=RUNNING TRES=cpu=2,gres/gpu=0", False),
+])
+def test_slurm_resource_field_versions(monkeypatch, resources, allowed):
+    import tapestry_m1.runtime.devices as devices
+    monkeypatch.setenv("M1_GPU_EXECUTION", "slurm")
+    monkeypatch.setenv("SLURM_JOB_ID", "123")
+    monkeypatch.setattr(devices.subprocess, "check_output", lambda *a, **kw: resources)
+    if allowed:
+        assert devices.execution_context()["job_id"] == "123"
+    else:
+        with pytest.raises(ContractError, match="allocated running GPU"):
+            devices.execution_context()

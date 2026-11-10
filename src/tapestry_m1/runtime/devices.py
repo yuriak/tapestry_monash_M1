@@ -36,7 +36,10 @@ def execution_context():
         raise ContractError("GPU inference requires a scheduler allocation")
     text = subprocess.check_output(["scontrol", "show", "job", "-o", job], text=True)
     fields = dict(x.split("=", 1) for x in text.split() if "=" in x)
-    if fields.get("JobState") != "RUNNING" or "gres/gpu=" not in fields.get("AllocTRES", ""):
+    # Older Slurm reports allocated running-job resources as TRES.
+    allocated = fields.get("AllocTRES", fields.get("TRES", ""))
+    gpu_count = next((v.split("=", 1)[1] for v in allocated.split(",") if v.startswith("gres/gpu=")), "0")
+    if fields.get("JobState") != "RUNNING" or not gpu_count.isdigit() or int(gpu_count) < 1:
         raise ContractError("scheduler does not show an allocated running GPU job")
     return {"execution_mode": mode, "job_id": job}
 
