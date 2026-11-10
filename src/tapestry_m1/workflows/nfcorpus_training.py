@@ -265,8 +265,10 @@ def test_retrieval(raw,retrieval,out,docs,qs,data):
     encoder.close();log('TEST_EMBEDDING_COMPLETE',queries=len(rows))
 
 
-def evaluate(c,spec,data,out,docs,qs,rankings,judgments,label,adapter=None):
+def evaluate(c,spec,data,out,docs,qs,rankings,judgments,label,adapter=None,*,inference_batch=None):
     import torch
+    batch=c['reranker_batch'] if inference_batch is None else inference_batch
+    if type(batch) is not int or batch<1:raise ContractError('invalid inference batch')
     directory=out/'evaluation'/label;directory.mkdir(parents=True,exist_ok=True)
     identity={'inputs':fingerprint(out/'inputs.json'),'adapter':fingerprint(adapter/'manifest.json') if adapter else 'base','config':c}
     if adapter:load_peft_state(adapter)
@@ -287,8 +289,8 @@ def evaluate(c,spec,data,out,docs,qs,rankings,judgments,label,adapter=None):
                 from tapestry_m1.reranker.qwen3 import Qwen3Reranker
                 root,_=verify_model(spec,data);backend=Qwen3Reranker(root,c)
             backend.model.eval()
-        log('EVAL_START',model=label,split=split,queries=len(frozen),pairs=len(frozen)*100)
-        cache=dest/'queries';cache.mkdir(exist_ok=True);results=[];truncated=0;start=time.monotonic();new_queries=0
+        log('EVAL_START',model=label,split=split,queries=len(frozen),pairs=len(frozen)*100,inference_batch=batch)
+        cache=dest/'queries';cache.mkdir(exist_ok=True);results=[];truncated=0;start=time.monotonic();new_queries=0;batch_counts={}
         for i,row in enumerate(frozen):
             q=row['query_id'];ids=[v['doc_id'] for v in row['candidates']]
             if len(ids)!=100 or len(set(ids))!=100:raise ContractError('Top100 contract violated')
@@ -297,22 +299,23 @@ def evaluate(c,spec,data,out,docs,qs,rankings,judgments,label,adapter=None):
                 saved=json.loads(path.read_text())
                 if saved['identity']!=score_id or saved['query_id']!=q:raise ContractError('score cache mismatch')
             else:
-                scores,lengths=backend.score_logits([qs[q]]*100,[docs[d] for d in ids],c['reranker_batch'])
+                scores,lengths=backend.score_logits([qs[q]]*100,[docs[d] for d in ids],batch)
                 if len(scores)!=100 or not all(math.isfinite(s) for s in scores):raise ContractError('invalid inference scores')
                 candidates=sorted([{'doc_id':d,'score':s} for d,s in zip(ids,scores)],key=lambda r:(-r['score'],r['doc_id']))
-                saved={'identity':score_id,'query_id':q,'candidates':[dict(v,rank=j+1) for j,v in enumerate(candidates)],'truncated':sum(v['truncated'] for v in lengths),'lengths':lengths}
+                saved={'identity':score_id,'inference_batch':batch,'query_id':q,'candidates':[dict(v,rank=j+1) for j,v in enumerate(candidates)],'truncated':sum(v['truncated'] for v in lengths),'lengths':lengths}
                 atomic_json(path,saved);new_queries+=1
             if {x['doc_id'] for x in saved['candidates']}!=set(ids):raise ContractError('reranker changed candidate membership')
+            used=str(saved.get('inference_batch',c['reranker_batch']));batch_counts[used]=batch_counts.get(used,0)+1
             results.append({'query_id':q,'candidates':saved['candidates']});truncated+=saved['truncated']
             if (i+1)%5==0 or i==0 or i+1==len(frozen):
                 elapsed=time.monotonic()-start
                 log('EVAL_PROGRESS',model=label,split=split,queries_done=i+1,queries_total=len(frozen),pairs_done=(i+1)*100,
-                    elapsed_seconds=elapsed,eta_seconds=elapsed/max(1,new_queries)*(len(frozen)-i-1),truncated_pairs=truncated)
+                    elapsed_seconds=elapsed,new_queries=new_queries,inference_batch=batch,new_pairs_per_second=new_queries*100/max(elapsed,1e-9),eta_seconds=elapsed/max(1,new_queries)*(len(frozen)-i-1),truncated_pairs=truncated)
         m=ranking_metrics(results,judgments[split]);base=ranking_metrics(frozen,judgments[split])
         for a,b in zip(m['per_query'],base['per_query']):
             if a['query_id']!=b['query_id'] or a['recall@100']!=b['recall@100']:raise ContractError('candidate recall invariance failed')
         write_rows(dest/'ranking.jsonl',results);atomic_json(dest/'metrics.json',m)
-        atomic_json(dest/'completed.json',{'identity':score_id,'truncated_pairs':truncated,'queries':len(results),'files':{n:fingerprint(dest/n) for n in ('ranking.jsonl','metrics.json')}})
+        atomic_json(dest/'completed.json',{'identity':score_id,'truncated_pairs':truncated,'queries':len(results),'inference_batch_query_counts':batch_counts,'files':{n:fingerprint(dest/n) for n in ('ranking.jsonl','metrics.json')}})
         log('EVAL_COMPLETE',model=label,split=split,metrics=m['means'])
     if backend:backend.close()
 
