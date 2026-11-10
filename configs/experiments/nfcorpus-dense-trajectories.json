@@ -1,0 +1,17 @@
+{
+  "schema_version": "m1.nfcorpus.dense-trajectories.v1",
+  "seed": 20261110,
+  "model": "../reranker/qwen3-reranker-0.6b.json",
+  "top_k": 100,
+  "steps": 200,
+  "checkpoint_every": 25,
+  "effective_groups": 8,
+  "micro_groups": 1,
+  "lr": 0.00005,
+  "lora": {"rank": 16, "alpha": 32, "dropout": 0.05, "targets": ["q_proj", "v_proj"]},
+  "dtype": "bfloat16",
+  "attention_backend": "sdpa",
+  "max_tokens": 2048,
+  "reranker_batch": 1,
+  "instruction": "Given a web search query, retrieve relevant passages that answer the query"
+}
