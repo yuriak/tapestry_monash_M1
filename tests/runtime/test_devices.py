@@ -55,3 +55,16 @@ def test_slurm_resource_field_versions(monkeypatch, resources, allowed):
     else:
         with pytest.raises(ContractError, match="allocated running GPU"):
             devices.execution_context()
+
+
+def test_array_guard_queries_exact_task(monkeypatch):
+    import tapestry_m1.runtime.devices as devices
+    monkeypatch.setenv("M1_GPU_EXECUTION", "slurm")
+    monkeypatch.setenv("SLURM_JOB_ID", "123")
+    monkeypatch.setenv("SLURM_ARRAY_JOB_ID", "123")
+    monkeypatch.setenv("SLURM_ARRAY_TASK_ID", "8")
+    def lookup(command, **kwargs):
+        assert command[-1] == "123_8"
+        return "JobState=RUNNING TRES=cpu=2,gres/gpu=1"
+    monkeypatch.setattr(devices.subprocess, "check_output", lookup)
+    assert devices.execution_context()["job_id"] == "123"

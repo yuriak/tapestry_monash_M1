@@ -34,7 +34,12 @@ def execution_context():
     job = os.environ.get("SLURM_JOB_ID")
     if not job:
         raise ContractError("GPU inference requires a scheduler allocation")
-    text = subprocess.check_output(["scontrol", "show", "job", "-o", job], text=True)
+    # The array parent numeric ID can expand to multiple task records.
+    # Query the exact task so a completed sibling cannot overwrite its state.
+    array = os.environ.get("SLURM_ARRAY_JOB_ID")
+    task = os.environ.get("SLURM_ARRAY_TASK_ID")
+    selector = f"{array}_{task}" if array and task else job
+    text = subprocess.check_output(["scontrol", "show", "job", "-o", selector], text=True)
     fields = dict(x.split("=", 1) for x in text.split() if "=" in x)
     # Older Slurm reports allocated running-job resources as TRES.
     allocated = fields.get("AllocTRES", fields.get("TRES", ""))
