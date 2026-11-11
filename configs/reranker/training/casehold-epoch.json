@@ -1,0 +1,39 @@
+{
+  "schema_version": "m1.casehold.epoch.v1",
+  "model": "../qwen3-reranker-0.6b.json",
+  "seed": 20261111,
+  "instruction": "Given a legal case citation context, identify the holding that best fits the context",
+  "max_tokens": 2048,
+  "dtype": "bfloat16",
+  "attention_backend": "sdpa",
+  "reranker_batch": 8,
+  "lora": {
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "targets": [
+      "q_proj",
+      "v_proj"
+    ]
+  },
+  "optimizer": {
+    "lr": 1e-05,
+    "weight_decay": 0.01
+  },
+  "effective_groups": 8,
+  "micro_groups": 1,
+  "max_grad_norm": 1.0,
+  "warmup_steps": 10,
+  "bootstrap_replicates": 10000,
+  "epochs": 1,
+  "world_size": 4,
+  "checkpoint_fractions": [
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "early_stopping": false,
+  "log_every": 10
+}
