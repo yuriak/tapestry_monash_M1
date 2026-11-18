@@ -3,7 +3,6 @@ import importlib
 import sys
 
 COMMANDS = {
-    "training": "tapestry_m1.workflows.reranker_training",
     "data": "tapestry_m1.data.cli",
     "evaluation": "tapestry_m1.evaluation.cli",
     "models": "tapestry_m1.runtime.assets",

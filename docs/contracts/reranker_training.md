@@ -82,11 +82,11 @@ Evaluation of a lawful real pilot must rerank **exactly** frozen baseline Top-10
 From the source checkout:
 
 ```bash
-./scripts/run --environment cpu training fixture tests/fixtures/training/groups.jsonl tests/fixtures/training/expected.json
+./scripts/reranker/groups/fixture.sh tests/fixtures/training/groups.jsonl tests/fixtures/training/expected.json
 ./scripts/run pytest -q tests/reranker/test_training_contract.py tests/reranker/test_lora_training.py
-./scripts/run training train configs/reranker/training/synthetic-warmup.json --data-root "$M1_DATA_ROOT" --output "$M1_RUN_ROOT/preflight" --preflight
-./scripts/run training train configs/reranker/training/synthetic-warmup.json --data-root "$M1_DATA_ROOT" --output "$M1_RUN_ROOT/L0-first" --stop-after 50
-./scripts/run training train configs/reranker/training/synthetic-warmup.json --data-root "$M1_DATA_ROOT" --output "$M1_RUN_ROOT/L0-resumed" --resume "$M1_RUN_ROOT/L0-first/checkpoints/step-000050"
+./scripts/reranker/groups/train.sh configs/reranker/training/synthetic-warmup.json --data-root "$M1_DATA_ROOT" --output "$M1_RUN_ROOT/preflight" --preflight
+./scripts/reranker/groups/train.sh configs/reranker/training/synthetic-warmup.json --data-root "$M1_DATA_ROOT" --output "$M1_RUN_ROOT/L0-first" --stop-after 50
+./scripts/reranker/groups/train.sh configs/reranker/training/synthetic-warmup.json --data-root "$M1_DATA_ROOT" --output "$M1_RUN_ROOT/L0-resumed" --resume "$M1_RUN_ROOT/L0-first/checkpoints/step-000050"
 ```
 
 GPU commands require an appropriate running allocation through the existing device guard; allocation details belong to the operator, not this contract. Outputs are fresh ignored/private directories, never Git. Repeat the two segments with `--objective L1`, separate outputs, same configuration. The source repository needs no wheel/install step or new dependencies. Environment and model digests in each run/checkpoint identify exact runtime inputs. Pin this contract and fixtures to the delivered Git commit and file SHA-256; partner sign-off is independent.

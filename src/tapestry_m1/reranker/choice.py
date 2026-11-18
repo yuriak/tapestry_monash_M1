@@ -51,3 +51,20 @@ def select(history):
 def lr_multiplier(update):
     """LR used for the numbered update: warm up 1..10, decay 11..120."""
     return min(update/10, max(0., (120-update)/110))
+
+
+def choice_macro_f1(rows):
+    """Five equally weighted option classes, with first-index tie breaking."""
+    matrix = [[0] * 5 for _ in range(5)]
+    for row in rows:
+        predicted = max(range(5), key=row["scores"].__getitem__)
+        matrix[row["gold"]][predicted] += 1
+    return sum(class_f1(matrix)) / 5
+
+
+def class_f1(matrix):
+    values = []
+    for label, row in enumerate(matrix):
+        denominator = sum(row) + sum(other[label] for other in matrix)
+        values.append(2 * row[label] / denominator if denominator else 0.)
+    return values

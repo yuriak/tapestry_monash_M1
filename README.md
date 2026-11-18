@@ -2,6 +2,10 @@
 
 A modular research codebase for evidence-grounded assistance in medicine and law across sovereign institutional and jurisdictional nodes. The project studies how shared learning and node-local specialization can improve evidence ranking and cited answers while keeping locally governed data under node control.
 
+## Centralized reranker training
+
+Use the task-specific shell scripts in [scripts/reranker](scripts/reranker/). The [recipe guide](docs/experiments/centralized-rerankers.md) covers data preparation, training, checkpoint evaluation and adding a JSONL dataset.
+
 ## Research programme
 
 **RQ1 — relevance under distributional heterogeneity.** Compare local and shared rerankers, shared-backbone/local-head approaches, jurisdiction routing and calibration. Measure query–evidence heterogeneity and study relevance distillation over abstracted evidence.

@@ -343,16 +343,21 @@ def summarize(c,out):
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--config',type=Path,required=True);p.add_argument('--raw',type=Path,required=True);p.add_argument('--retrieval',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--data-root',type=Path,required=True);p.add_argument('--stage',choices=['preflight','run'],required=True);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--config',type=Path,required=True);p.add_argument('--raw',type=Path,required=True);p.add_argument('--retrieval',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--data-root',type=Path,required=True);p.add_argument('--stage',choices=['prepare','preflight','train','evaluate','run'],required=True);a=p.parse_args()
     c=json.loads(a.config.read_text());spec=json.loads((a.config.parent/c['model']).read_text())
     if c['top_k']!=100 or c['steps']!=200 or c['checkpoint_every']!=25:raise ContractError('unexpected frozen experiment budget')
     log('PIPELINE_START',stage=a.stage,config=c)
-    hardware=gpu_runtime();identity,docs,qs,groups=prepare(c,a.raw,a.retrieval,a.output)
+    identity,docs,qs,groups=prepare(c,a.raw,a.retrieval,a.output)
+    if a.stage=='prepare':return
+    hardware=gpu_runtime()
     atomic_json(a.output/'hardware.json',hardware)
-    preflight(c,spec,a.data_root,a.output,groups,identity)
-    if a.stage=='preflight':return
-    for objective in ('L0','L2'):train(c,spec,a.data_root,a.output,groups,identity,objective)
-    atomic_json(a.output/'training-frozen.json',{'arms':{o:fingerprint(a.output/o/'completed.json') for o in ('L0','L2')},'checkpoints':list(range(25,201,25)),'test_has_not_influenced_training':True})
+    if a.stage in ('run', 'preflight'):
+        preflight(c,spec,a.data_root,a.output,groups,identity)
+        if a.stage=='preflight':return
+    if a.stage in ('run', 'train'):
+        for objective in ('L0','L2'):train(c,spec,a.data_root,a.output,groups,identity,objective)
+        atomic_json(a.output/'training-frozen.json',{'arms':{o:fingerprint(a.output/o/'completed.json') for o in ('L0','L2')},'checkpoints':list(range(25,201,25)),'test_has_not_influenced_training':True})
+    if a.stage=='train':return
     test_retrieval(a.raw,a.retrieval,a.output,docs,qs,a.data_root)
     rankings={'dev':list(records(a.retrieval/'dev-ranking.jsonl')),'test':list(records(a.output/'test-ranking.jsonl'))}
     judgments={s:qrels(a.raw/'qrels'/f'{s}.tsv',qs,docs) for s in ('dev','test')}

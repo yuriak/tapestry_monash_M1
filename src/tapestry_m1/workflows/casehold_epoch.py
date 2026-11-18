@@ -86,7 +86,8 @@ def merged_evaluation(directory,groups,world):
     rows=[by_id[g['query_id']] for g in groups]
     if any(r['gold']!=g['gold'] for r,g in zip(rows,groups)):
         raise ContractError('label mismatch in merged evaluation')
-    summary=aggregate(rows);summary['truncated_pairs']=sum(r['truncated_pairs'] for r in rows)
+    from tapestry_m1.reranker.choice import choice_macro_f1
+    summary=aggregate(rows);summary['choice_macro_f1']=choice_macro_f1(rows);summary['truncated_pairs']=sum(r['truncated_pairs'] for r in rows)
     atomic_json(directory/'merged-summary.json',summary)
     return summary,rows
 
@@ -213,9 +214,12 @@ def run(args):
             history.append(summary|{'step':step,'adapter_hash':meta['adapter_hash']})
             log('validation_checkpoint_complete',**history[-1])
     if rank==0:
-        chosen=select(history)
+        metric = config.get('selection_metric', 'accuracy')
+        if metric not in ('accuracy', 'choice_macro_f1'):
+            raise ValueError(f'Unknown selection metric {metric}')
+        chosen = max(history, key=lambda item: (item[metric], item['mrr'], -item['step']))
         atomic_json(output/'selection.json',{'identity':identity,'selected':chosen,'validation_history':history,
-                    'rule':'full-validation accuracy, then MRR, then earlier step','test_not_used_for_selection':True})
+                    'rule':f'full-validation {metric}, then MRR, then earlier step','test_not_used_for_selection':True})
         if not (output/'test-start.json').exists():
             atomic_json(output/'test-start.json',{'time':datetime.now(timezone.utc).isoformat(),
                         'selection_sha256':fingerprint(output/'selection.json')})
