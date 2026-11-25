@@ -124,7 +124,7 @@ def check_inputs(root, expected):
             raise ValueError(f'Frozen source mismatch: {name}')
 
 
-def build(dataset, root, rules):
+def materialize(dataset, root, rules, stage):
     rows = assign(dataset,records(dataset,root,rules),rules)
     keys = [(r['split'],r['query_id']) for r in rows]
     if len(set(keys)) != len(keys):
@@ -132,35 +132,44 @@ def build(dataset, root, rules):
     assignment = {r['group_id']:r['site'] for r in rows}
     if any(assignment[r['group_id']] != r['site'] for r in rows):
         raise ValueError('Overlapping site group')
-    output = root/rules['version']
     summary = summarize(rows)
+    for site in rules.get('sites',['A','B']):
+        out = stage/site
+        out.mkdir(parents=True)
+        kept = [r for r in rows if r['site']==site]
+        splits = {s:[r['query_id'] for r in kept if r['split']==s] for s in summary[site]}
+        if len(splits)!=3 or any(not qs for qs in splits.values()):
+            raise ValueError('Missing site split')
+        with (out/'index.jsonl').open('w') as f:
+            for r in kept:
+                f.write(json.dumps(r,sort_keys=True)+'\n')
+        if dataset=='casehold':
+            casehold(root,out,splits)
+        elif dataset=='evidence_inference':
+            evidence(root,out,splits)
+        elif dataset=='bioasq':
+            ranking(root,out,splits)
+        else:
+            ids = [q for qs in splits.values() for q in qs]
+            with (root/'prepared/chunks.pkl').open('rb') as f:
+                chunks = pickle.load(f)
+            for key in ['tokens','spans']:
+                chunks[key]['queries'] = subset(chunks[key]['queries'],ids)
+            write_pickle(out/'data/chunks.pkl',chunks)
+            for task in ['lsr','pcr']:
+                ranking(root,out,splits,task)
+    return summary
+
+
+def build(dataset, root, rules):
+    output = root/rules['version']
     with tempfile.TemporaryDirectory(dir=root) as tmp:
         stage = Path(tmp)/rules['version']
-        for site in ['A','B']:
-            out = stage/site
-            out.mkdir(parents=True)
-            kept = [r for r in rows if r['site']==site]
-            splits = {s:[r['query_id'] for r in kept if r['split']==s] for s in summary[site]}
-            if len(splits)!=3 or any(not qs for qs in splits.values()):
-                raise ValueError('Missing site split')
-            with (out/'index.jsonl').open('w') as f:
-                for r in kept:
-                    f.write(json.dumps(r,sort_keys=True)+'\n')
-            if dataset=='casehold':
-                casehold(root,out,splits)
-            elif dataset=='evidence_inference':
-                evidence(root,out,splits)
-            elif dataset=='bioasq':
-                ranking(root,out,splits)
-            else:
-                ids = [q for qs in splits.values() for q in qs]
-                with (root/'prepared/chunks.pkl').open('rb') as f:
-                    chunks = pickle.load(f)
-                for key in ['tokens','spans']:
-                    chunks[key]['queries'] = subset(chunks[key]['queries'],ids)
-                write_pickle(out/'data/chunks.pkl',chunks)
-                for task in ['lsr','pcr']:
-                    ranking(root,out,splits,task)
+        if dataset=='judicialmind':
+            from .judicial import materialize as judicial_views
+            summary = judicial_views(root,stage,rules)
+        else:
+            summary = materialize(dataset,root,rules,stage)
         write(stage/'summary.json',summary)
         hashes = {}
         for path in sorted(stage.rglob('*')):
@@ -177,15 +186,18 @@ def build(dataset, root, rules):
                         raise ValueError(f'Damaged output: {name}')
         else:
             stage.rename(output)
-    print(dataset, 'site train queries', *(summary[s]['train']['queries'] for s in ['A','B']), flush=True)
+    print(dataset, 'site train queries', *(summary[s]['train']['queries'] for s in summary), flush=True)
 
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('dataset',choices=['casehold','evidence_inference','il_pcsr','bioasq'])
+    parser.add_argument('dataset',choices=['casehold','evidence_inference','il_pcsr','bioasq','judicialmind'])
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--rules',type=Path,required=True)
     args=parser.parse_args()
-    reference = read(args.rules.with_name('reference.json'))[args.dataset]
+    source_reference = 'reference_v2.json' if args.dataset=='judicialmind' else 'reference.json'
+    reference = read(args.rules.with_name(source_reference))[args.dataset]
     check_inputs(args.root,reference['inputs'])
-    build(args.dataset,args.root,read(args.rules))
+    rules = read(args.rules.with_name('rules.json'))
+    rules.update(read(args.rules))
+    build(args.dataset,args.root,rules)

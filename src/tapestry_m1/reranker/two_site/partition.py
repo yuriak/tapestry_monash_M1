@@ -53,6 +53,8 @@ def records(dataset, root, rules):
                 court = policy['aliases'].get(court, court) or 'unknown'
                 pref = 'shared' if court in [*policy['shared'], 'unknown'] else (
                     'A' if court in policy['north'] else 'B')
+                if rules['version']=='v2' and pref!='shared':
+                    pref = 'delhi' if court in rules['delhi'] else 'west' if court in rules['west'] else 'regional'
                 text = '\n'.join(r['text'])
                 append(split, str(r['id']), group_text(text), court, pref, text,
                        {k:len(set(r[f'relevant_{field}_ids'])) for k,field in
@@ -141,11 +143,16 @@ def assign(dataset, rows, rules):
             if prefs:
                 break
         pref = next(iter(prefs)) if len(prefs)==1 else 'shared'
-        probability = {'A':rules['preferred_probability'],'B':1-rules['preferred_probability'],
-                       'shared':0.5}[pref]
         key = f"{rules['seed']}:{dataset}:{group}"
         draw = int(digest(key)[:16],16) / 2**64
-        r.update(site='A' if draw<probability else 'B', dataset=dataset,
+        if rules['version']=='v2':
+            first,second,_ = rules.get(dataset+'_weights',{}).get(pref,rules['weights'][pref])
+            site = rules['sites'][0 if draw<first else 1 if draw<first+second else 2]
+        else:
+            probability = {'A':rules['preferred_probability'],'B':1-rules['preferred_probability'],
+                           'shared':0.5}[pref]
+            site = 'A' if draw<probability else 'B'
+        r.update(site=site, dataset=dataset,
                  version=rules['version'], metadata_status=('unclassified' if r['category']
                  in ('unknown','mixed') else 'classified'), reference=r['query_id'])
     return rows

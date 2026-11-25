@@ -69,6 +69,9 @@ def acquire(dataset,root,scripts,config):
         return
     model = snapshot_download('Qwen/Qwen3-Reranker-0.6B',revision=MODEL,
                               allow_patterns=['*.json','*.txt','*.model'])
+    if dataset=='judicialmind':
+        acquire_judicial(root,scripts,model)
+        return
     if dataset=='bioasq':
         for folder,split in [('text-corpus','test'),('question-answer-passages','train'),
                              ('question-answer-passages','test')]:
@@ -123,9 +126,59 @@ def acquire(dataset,root,scripts,config):
 
 
 
+def acquire_judicial(root,scripts,model):
+    from urllib.parse import quote
+    raw,prepared,retrieval = root/'raw',root/'prepared',root/'retrieval'
+    native = root/'tax'
+    revision = '8ed53a3527c78823ba12e979134dcdac152f8e55'
+    for prefix in ('english_world/au/australian_legal_qa','english_india/in/sc_judgments',
+                   'english_india/in/rbi_documents'):
+        for bucket in 'ABC':
+            name = f'{prefix}_{bucket}.parquet'
+            download('judicialmind/legal-training-dataset',revision,name,raw/name)
+    qp = 'au-australian-tax-guidance-retrieval::'
+    dp = 'au-australian-tax-guidance-retrieval-native::'
+    for name,target in [('queries','queries'),('corpus','documents'),('default','qrels')]:
+        source = native/'upstream'/(name+'.jsonl')
+        download('isaacus/australian-tax-guidance-retrieval','982aa11494f04dee16cacf18ae1fbf59f6669845',
+                 name+'.jsonl',source)
+        with source.open() as reader,(native/(target+'.jsonl')).open('w') as writer:
+            for line in reader:
+                row=json.loads(line)
+                if name=='default':
+                    item={'query_id':qp+quote(row['query-id'],safe=''),
+                          'doc_id':dp+quote(row['corpus-id'],safe=''),'relevance':row['score']}
+                else:
+                    key,prefix=('query_id',qp) if name=='queries' else ('doc_id',dp)
+                    item={key:prefix+quote(row['_id'],safe=''),'text':row['text']}
+                    if name=='queries':
+                        item['query_text']=item.pop('text')
+                writer.write(json.dumps(item)+'\n')
+    if not (prepared/'audit.json').exists():
+        script(scripts,'judicialmind','prepare',raw=raw,tax=native,output=prepared)
+    if not (prepared/'tokens.pkl').exists():
+        script(scripts,'judicialmind','cache_tokens',model=model,data=prepared)
+    if not (retrieval/'frozen.json').exists():
+        module='tapestry_m1.reranker.recipes.judicialmind.retrieve'
+        devices=min(4,int(os.environ.get('GPUS','1')))
+        if devices<1:
+            raise ValueError('GPUS must be positive for cold JudicialMind retrieval')
+        if not all((retrieval/f'rank-{r}.json').exists() for r in range(4)):
+            embed=snapshot_download('Qwen/Qwen3-Embedding-4B',revision=EMBED)
+            def encode_device(device):
+                for rank in range(device,4,devices):
+                    subprocess.run([sys.executable,'-m',module,'encode','--world','4','--rank',str(rank),
+                        '--local-rank',str(device),'--model',embed,'--data',str(prepared),
+                        '--output',str(retrieval)],check=True)
+            with ThreadPoolExecutor(max_workers=devices) as workers:
+                list(workers.map(encode_device,range(devices)))
+        subprocess.run([sys.executable,'-m',module,'freeze','--world','4','--data',str(prepared),
+                        '--output',str(retrieval),'--top','500'],check=True)
+
+
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('dataset',choices=['casehold','il_pcsr','evidence_inference','bioasq'])
+    p.add_argument('dataset',choices=['casehold','il_pcsr','evidence_inference','bioasq','judicialmind'])
     for name in ['root','scripts','config']:
         p.add_argument('--'+name,type=Path,required=True)
     a=p.parse_args()

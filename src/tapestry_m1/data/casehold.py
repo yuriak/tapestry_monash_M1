@@ -30,6 +30,21 @@ SITE_FILES = {
         'validation': ('val.csv', 2958, 'c56bf2b25d33d85ae9e4c840c9f355a71a347431109e80c0b75585e820c349bc'),
         'test': ('test.csv', 2963, '8eabba10050d32319d6b3b36930e2c63eaf4da77437d95410549c1903d926e75'),
     },
+    'monash': {
+        'train': ('train.csv', 13119, '8884ad021207270d5500883b9d866fb0729ebcf1f5ce6cdf436c3c4b6d16e947'),
+        'validation': ('val.csv', 1599, 'ca8033a9997092150ebe4715adc15483870a7b1bd18ceba19fc461bb4e43118e'),
+        'test': ('test.csv', 1623, 'f341d3050410d8ff679ff448469225838884c6b81409183982a518c7b4814812'),
+    },
+    'bharatgen': {
+        'train': ('train.csv', 15294, '115cef1182932af46caf7de6edff1850b4376476bfe71940223c8af36fb30429'),
+        'validation': ('val.csv', 1943, 'a923e068ffc7727663ad04c9acde98391e6399a0757c0c5bb729ad2cffd12351'),
+        'test': ('test.csv', 1885, '6b444e2be2c8af8913989fea59fde63b2788e715ca17737bb6fbd542d7b719ad'),
+    },
+    'iitd': {
+        'train': ('train.csv', 14096, 'b564d4e62fe26f05593d8fbff64b65b1f91054d099db501c919a4fbc1ec08660'),
+        'validation': ('val.csv', 1772, '36c93f957104d8e2f7c6da4cad499f51ee73fa3921c1e4a55ad4b4a4e0b3d59f'),
+        'test': ('test.csv', 1806, '308899841aab07a6b11aa988192998ddc932ad91c74274b431787aade1b2f9da'),
+    },
 }
 
 

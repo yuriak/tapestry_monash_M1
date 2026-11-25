@@ -1,0 +1,67 @@
+{
+  "version": "v2",
+  "sites": [
+    "monash",
+    "bharatgen",
+    "iitd"
+  ],
+  "west": [
+    "Gujarat High Court",
+    "Bombay High Court",
+    "Rajasthan High Court",
+    "Madhya Pradesh High Court"
+  ],
+  "delhi": [
+    "Delhi High Court",
+    "Delhi District Court"
+  ],
+  "weights": {
+    "A": [
+      0.5,
+      0.17,
+      0.33
+    ],
+    "B": [
+      0.17,
+      0.5,
+      0.33
+    ],
+    "shared": [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    "delhi": [
+      0.64,
+      0.18,
+      0.18
+    ],
+    "west": [
+      0.18,
+      0.64,
+      0.18
+    ],
+    "regional": [
+      0.22,
+      0.22,
+      0.56
+    ]
+  },
+  "indian_public_domains": [
+    "admin",
+    "constitutional",
+    "criminal",
+    "environmental",
+    "human_rights",
+    "immigration",
+    "procedural",
+    "regulatory"
+  ],
+  "casehold_weights": {
+    "B": [
+      0.2,
+      0.47,
+      0.33
+    ]
+  }
+}

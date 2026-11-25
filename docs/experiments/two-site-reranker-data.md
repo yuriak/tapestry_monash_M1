@@ -1,12 +1,13 @@
-# Build the two-site reranker datasets
+# Rebuild the historical two-site reranker datasets (v1)
 
-Each command produces one versioned partition with A and B views. Each institution runs the builder locally using its own authorized sources. Both views are generated to audit the union. Use the designated site's directory for local learning; the pooled upstream workspace contains both views. Only coordinate indexes, configuration and aggregate digests are distributed with this repository.
+For the current default see the [three-site guide](three-site-reranker-data.md). Set `SPLIT_VERSION=v1` to use the original rules. Each command produces one versioned partition with A and B views. Each institution runs the builder locally using its own authorized sources. Both views are generated to audit the union. Use the designated site's directory for local learning; the pooled upstream workspace contains both views. Only coordinate indexes, configuration and aggregate digests are distributed with this repository.
 
 ## Setup and build
 
 Use Python 3.11, Git, Bash and flock on Linux. Install the pinned data/recipe dependencies in an environment of your choice. The default output is under this checkout. Set HF_TOKEN privately or sign in to Hugging Face with your own approved IL-PCSR account before starting IL. The public benchmarks can be built separately.
 
 ```bash
+export SPLIT_VERSION=v1
 uv venv --python 3.11 .venv
 export PYTHON="$PWD/.venv/bin/python"
 uv pip install --python "$PYTHON" -r configs/reranker/two_site/requirements.txt

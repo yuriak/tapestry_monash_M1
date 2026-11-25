@@ -1,3 +1,3 @@
 # Local datasets
 
-Run the [two-site builder](../docs/experiments/two-site-reranker-data.md) from this checkout. Its default destination is `data/two-site/<dataset>/v1/{A,B}/`. Generated data, local manifests and authorized upstream files stay outside Git.
+The [reranker builder](../docs/experiments/three-site-reranker-data.md) writes `two-site/<dataset>/v2/{monash,bharatgen,iitd}/` below this directory. Set `SPLIT_VERSION=v1` to build the historical A/B views. Local records, indexes, caches and weights stay outside Git.

@@ -22,12 +22,14 @@ def fingerprint(obj):
     return hashlib.sha256(json.dumps(obj,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
 
-def verify(dataset, root, config, model):
-    reference = read(config/'reference.json')[dataset]
-    target = root/'v1'
+def verify(dataset, root, config, model, version='v1'):
+    reference = read(config/('reference.json' if version=='v1' else 'reference_v2.json'))[dataset]
+    target = root/version
     groups = {}
+    judicial_parents = {}
     union = defaultdict(set)
-    for site in 'AB':
+    sites = ['A','B'] if version=='v1' else read(config/'v2.json')['sites']
+    for site in sites:
         out = target/site
         rows = [json.loads(line) for line in (out/'index.jsonl').read_text().splitlines()]
         membership = [[r['split'],r['query_id'],r['group_id']] for r in rows]
@@ -39,7 +41,10 @@ def verify(dataset, root, config, model):
                     'Overlapping group or query')
             union[s].add(q)
             by_split[s].add(q)
-        if dataset=='casehold':
+        if dataset=='judicialmind':
+            from .judicial import verify_site
+            verify_site(root,out,by_split,reference[site],model,judicial_parents)
+        elif dataset=='casehold':
             from transformers import AutoTokenizer
             from tapestry_m1.reranker.qwen3 import PREFIX,SUFFIX
             from tapestry_m1.reranker.peft_training import prepare_inputs
@@ -78,13 +83,16 @@ def verify(dataset, root, config, model):
         source = {s:{r['query_id'] for r in load_split(root/'raw',s)} for s in FILES}
     elif dataset=='evidence_inference':
         source = {s:{r['id'] for r in read(root/'prepared'/f'{s}.json')} for s in union}
+    elif dataset=='judicialmind':
+        original = read(root/'prepared/data.json')
+        source = {'train':{r['qh'] for r in original['train']},'dev':set(original['dev']),'test':set(original['test'])}
     else:
         native_dir = root/'prepared'/'lsr' if dataset=='il_pcsr' else root/'prepared'
         source = {s:set(qs) for s,qs in read(native_dir/'data.json')['splits'].items()}
     require(dict(union)==source,'Site union differs from the original split IDs')
     counts = {s:len(qs) for s,qs in union.items()}
     require(counts==reference['counts'],'Incomplete split union')
-    print(dataset,'verified native inputs for A and B',counts,flush=True)
+    print(dataset,'verified native inputs for',sites,counts,flush=True)
 
 
 def check_ranking(root,out,task,by_split,reference,model):
@@ -135,9 +143,10 @@ if __name__=='__main__':
     from .acquire import MODEL
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('dataset')
+    p.add_argument('--version',choices=['v1','v2'],default='v1')
     for name in ['root','config']:
         p.add_argument('--'+name,type=Path,required=True)
     a=p.parse_args()
     model=os.environ.get('RERANKER_TOKENIZER') or snapshot_download('Qwen/Qwen3-Reranker-0.6B',
              revision=MODEL,allow_patterns=['*.json','*.txt','*.model'])
-    verify(a.dataset,a.root,a.config,model)
+    verify(a.dataset,a.root,a.config,model,a.version)
