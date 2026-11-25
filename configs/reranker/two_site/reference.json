@@ -1,0 +1,60 @@
+{
+  "bioasq": {
+    "A": {
+      "bioasq": "c3f2c046d67a181d6b5527ef3a533c044c33a6f0f8c6146083597e461eb79466",
+      "membership": "5b9cacc66a7ddac0cf9443358eba65e684371432fcdbbb78924df1884ef72f81"
+    },
+    "B": {
+      "bioasq": "cf81eaeed067a90e76ee393002ef24e171eb9e5f9337c848243fbfa51ee4c9b1",
+      "membership": "2ceeeed7cd0cf4a41602730c52effa57e5186b2abbb74d52702b7e4741f7962b"
+    },
+    "counts": {
+      "dev": 400,
+      "test": 707,
+      "train": 3607
+    }
+  },
+  "casehold": {
+    "A": {
+      "membership": "b28252152cf8793af283d11d13c5bd4e683348c54422cc6ac9e817a55526a227"
+    },
+    "B": {
+      "membership": "d8c9e60ddf2d7ed1f1612296e9d3d16518a350e9ac04d71bdf8062bd483ad7a2"
+    },
+    "counts": {
+      "test": 5314,
+      "train": 42509,
+      "validation": 5314
+    }
+  },
+  "evidence_inference": {
+    "A": {
+      "membership": "265ac54b4489fe0dda5f373583a81b65ab2cfb19eef057d034745d058bd9d0b0"
+    },
+    "B": {
+      "membership": "e8c961986ed48852355ce625746dba2d58741e1e5dcd4578064096681c993b48"
+    },
+    "counts": {
+      "test": 1224,
+      "train": 10116,
+      "validation": 1237
+    }
+  },
+  "il_pcsr": {
+    "A": {
+      "lsr": "87848bb1087c6ff1f3f50b6c4be1ab785adfebeae1daf5e47dba96089d049bf8",
+      "membership": "6e5f5ef3124222d011ca556efada041f458bf1249aa93b495324c393443c3b4b",
+      "pcr": "c074bedc629be8d88bb6dae6988bfdbd21ec86e55f6cc6a27dbc2600282125cd"
+    },
+    "B": {
+      "lsr": "45178b2032e4e49bb350f518eaabcf3ffda807a3b9d2ecfc6488b185dd508e7f",
+      "membership": "72c82ac163ea5cb23d504f62424b71c777e862f2412ccad0db5ff59666c7589b",
+      "pcr": "a0f7fb4f0aa7913533969d265ee01cb03169bf3bf0a04207c877b7710b1372f7"
+    },
+    "counts": {
+      "dev": 627,
+      "test": 627,
+      "train": 5017
+    }
+  }
+}

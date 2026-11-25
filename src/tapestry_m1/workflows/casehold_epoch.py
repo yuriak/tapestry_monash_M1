@@ -12,7 +12,7 @@ import tempfile
 import time
 
 from tapestry_m1.core.io import ContractError,atomic_json,dumps,fingerprint
-from tapestry_m1.data.casehold import FILES,load_split
+from tapestry_m1.data.casehold import FILES,files_for,load_split
 from tapestry_m1.reranker.choice import aggregate,group_ce,metrics,select
 from tapestry_m1.reranker.distributed_groups import accumulate_groups,checkpoint_steps,epoch_order,local_batch,lr_factor
 from tapestry_m1.reranker.peft_backend import build_backend
@@ -177,7 +177,7 @@ def run(args):
     total=math.ceil(len(splits['train'])/config['effective_groups'])
     checkpoints=checkpoint_steps(len(splits['train']),config['effective_groups'],config['checkpoint_fractions'])
     spec=read(args.config.parent/config['model'])
-    inputs={'config':config,'code':code_fingerprint(),'raw':{s:v[2] for s,v in FILES.items()},
+    inputs={'config':config,'code':code_fingerprint(),'raw':{s:v[2] for s,v in files_for(args.raw).items()},
             'model_spec':spec,'world_size':world,'gpu':hardware['gpu'],
             'environment_lock_sha256':fingerprint(os.environ['M1_ENVIRONMENT_LOCK']),
             'packages':{p:importlib.metadata.version(p) for p in ['torch','transformers','peft','accelerate','tokenizers','numpy','safetensors']},

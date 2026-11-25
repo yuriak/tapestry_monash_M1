@@ -1,0 +1,22 @@
+{
+  "version": "v1",
+  "seed": 42,
+  "preferred_probability": 0.72,
+  "il_pcsr": {
+    "north": ["Delhi District Court", "Delhi High Court", "Punjab-Haryana High Court", "Allahabad High Court", "Himachal Pradesh High Court", "Uttarakhand High Court", "Jammu & Kashmir High Court - Srinagar Bench"],
+    "shared": ["Supreme Court of India"],
+    "aliases": {"Uttaranchal High Court": "Uttarakhand High Court", "Rajasthan High Court - Jodhpur": "Rajasthan High Court"}
+  },
+  "casehold": {
+    "criminal": "\\b(criminal|convict\\w*|indict\\w*|sentenc\\w*|prosecut\\w*|guilty|felony|offense|offence|habeas|fourth amendment|arrest)\\b",
+    "civil": "\\b(plaintiff|tort|contract|civil|negligence|damages|insurance|bankrupt\\w*|employment|liability|summary judgment|discrimination|benefits|injunction)\\b"
+  },
+  "bioasq": {
+    "molecular": "\\b(gene\\w*|protein\\w*|rna|mrna|mirna|dna|chromosom\\w*|receptor\\w*|enzym\\w*|express\\w*|molecular|transcription\\w*|mutation\\w*|sequenc\\w*|pathway\\w*|genom\\w*|ligand\\w*)\\b",
+    "clinical": "\\b(treat\\w*|therap\\w*|patient\\w*|disease\\w*|diagnos\\w*|clinical|trial\\w*|symptom\\w*|drug\\w*|syndrome\\w*|vaccin\\w*|risk|cancer|approved|survival|surg\\w*)\\b"
+  },
+  "evidence_inference": {
+    "drug": "\\b(placebo|drug|dose|dosage|mg|mcg|intravenous|tablet\\w*|insulin|aspirin|[a-z]+(?:mab|nib|statin|pril|olol|sartan|caine|cillin|mycin|gliptin|glutide|setron|prazole|oxetine|profen|asone|zepam|triptan|terol))\\b",
+    "procedure_behavior": "\\b(exercis\\w*|train\\w*|surg\\w*|counsel\\w*|educat\\w*|behavio\\w*|cognitive|diet\\w*|rehabilitat\\w*|physiotherap\\w*|acupuncture|stent\\w*|imaging|scan\\w*|device\\w*|radiation|radiotherapy|support|telephone|orthosis|massage|laparoscop\\w*)\\b"
+  }
+}

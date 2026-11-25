@@ -5,6 +5,7 @@ Dataset: Zheng, Guha et al., ICAIL 2021, "When Does Pretraining Help?"
 """
 import csv
 import hashlib
+import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -16,6 +17,31 @@ FILES = {
     'validation': ('val.csv', 5314, '22e696e4e5e68fefe28fcce86cca430a03bcddfddb4d464a79b25c60c4d56653'),
     'test': ('test.csv', 5314, '1467ea7600fef2c287aa171219ab907346e022c36f70477ff5d52b0767956e62'),
 }
+
+
+SITE_FILES = {
+    'A': {
+        'train': ('train.csv', 18811, 'aac0dd01b38b559a40d1e21258ed5826b8dbdd64a0e9701eb6c3448daebb83ce'),
+        'validation': ('val.csv', 2356, 'a34174e3b18381692254725c643bfa38e806c6e894d6c28c2018533fdfc8c9fc'),
+        'test': ('test.csv', 2351, '1ed346feb0a3e4bace29c22d702bc6b5d17715c1d315bc9fc49901a1543746a9'),
+    },
+    'B': {
+        'train': ('train.csv', 23698, '74f1b817b25e6ebd4f942e817c37e2452be8a20bcd84bb4ffb33eaa9a4601904'),
+        'validation': ('val.csv', 2958, 'c56bf2b25d33d85ae9e4c840c9f355a71a347431109e80c0b75585e820c349bc'),
+        'test': ('test.csv', 2963, '8eabba10050d32319d6b3b36930e2c63eaf4da77437d95410549c1903d926e75'),
+    },
+}
+
+
+def files_for(root):
+    index = Path(root)/'index.jsonl'
+    if not index.is_file():
+        return FILES
+    with index.open() as handle:
+        record = json.loads(handle.readline())
+    if record.get('dataset') != 'casehold' or record.get('site') not in SITE_FILES:
+        raise ContractError('Unexpected CaseHOLD site index')
+    return SITE_FILES[record['site']]
 
 
 def parse_row(row, split):
@@ -30,7 +56,7 @@ def parse_row(row, split):
 
 
 def load_split(root, split):
-    name, count, sha = FILES[split]
+    name, count, sha = files_for(root)[split]
     path = Path(root)/name
     if fingerprint(path) != sha:
         raise ContractError('CaseHOLD raw checksum mismatch: '+split)
@@ -89,7 +115,7 @@ def audit(root, comparison_limit=250000):
                     capped = True
     return {'dataset': 'casehold/casehold', 'config': 'all', 'revision': REVISION,
             'mapping': {'query': 1, 'choices': [2,3,4,5,6], 'label': 12, 'label_base': 0},
-            'files': {s: {'file': v[0], 'count': v[1], 'sha256': v[2]} for s,v in FILES.items()},
+            'files': {s: {'file': v[0], 'count': v[1], 'sha256': v[2]} for s,v in files_for(root).items()},
             'label_counts': {s: dict(Counter(g['gold'] for g in gs)) for s,gs in splits.items()},
             'exact_normalized_tuple_pairs': dict(overlaps),
             'near_duplicate_screen': {'method': '8 bottom 64-bit trigram hashes; bucket cap32; max16 cross-split comparisons per query; Jaccard>=0.90',

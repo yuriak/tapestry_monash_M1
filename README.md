@@ -2,6 +2,10 @@
 
 A modular research codebase for evidence-grounded assistance in medicine and law across sovereign institutional and jurisdictional nodes. The project studies how shared learning and node-local specialization can improve evidence ranking and cited answers while keeping locally governed data under node control.
 
+## Two-site reranker data
+
+Build the versioned site inputs under `data/two-site/` using the [two-site data guide](docs/experiments/two-site-reranker-data.md).
+
 ## Centralized reranker training
 
 Use the task-specific shell scripts in [scripts/reranker](scripts/reranker/). The [recipe guide](docs/experiments/centralized-rerankers.md) covers data preparation, training, checkpoint evaluation and adding a JSONL dataset.
