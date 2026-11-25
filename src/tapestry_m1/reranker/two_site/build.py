@@ -113,6 +113,14 @@ def ranking(root, out, splits, task=None):
     write(route/'embedding-metrics.json',metrics)
 
 
+def check_inputs(root, expected):
+    for name,checksum in expected.items():
+        with (root/name).open('rb') as handle:
+            actual = hashlib.file_digest(handle,'sha256').hexdigest()
+        if actual != checksum:
+            raise ValueError(f'Frozen source mismatch: {name}')
+
+
 def build(dataset, root, rules):
     rows = assign(dataset,records(dataset,root,rules),rules)
     keys = [(r['split'],r['query_id']) for r in rows]
@@ -175,4 +183,6 @@ if __name__=='__main__':
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--rules',type=Path,required=True)
     args=parser.parse_args()
+    reference = read(args.rules.with_name('reference.json'))[args.dataset]
+    check_inputs(args.root,reference['inputs'])
     build(args.dataset,args.root,read(args.rules))
