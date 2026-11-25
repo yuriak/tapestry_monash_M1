@@ -40,7 +40,8 @@ def evidence(root, out, splits):
     docs = read(prepared/'documents.json')
     articles = set()
     manifest = read(prepared/'manifest.json')
-    manifest.pop('splits')
+    manifest = {k:manifest[k] for k in ('gold_policy','offset_policy')}
+    manifest['sentence_segmentation'] = 'reference en_core_sci_sm 0.5.4, spaCy 3.7.5'
     manifest['splits'] = {}
     for split, ids in splits.items():
         keys = set(ids)
@@ -83,6 +84,8 @@ def ranking(root, out, splits, task=None):
         data['queries'] = subset(data['queries'],ids)
         # Parent-wide audit fields do not describe a site.
         manifest = {k:manifest[k] for k in ('source','corpus_file','max_length','seed','splits','train_pairs')}
+        from .acquire import BIO
+        manifest['source'] = {'dataset':'enelpol/rag-mini-bioasq','revision':BIO}
         with (data_dir/'tokens.pkl').open('rb') as f:
             cache = pickle.load(f)
         cache['queries'] = subset(cache['queries'],ids)
@@ -92,7 +95,7 @@ def ranking(root, out, splits, task=None):
     frozen = read(retrieval/'frozen.json')
     views = {}
     for split,qs in splits.items():
-        views[split] = {field:subset(values,qs) for field,values in frozen[split].items()}
+        views[split] = {field:subset(frozen[split][field],qs) for field in ('candidates','gold')}
         if any(views[split]['gold'][q] != data['gold'][q] for q in qs):
             raise ValueError('Frozen and native qrels disagree')
     write(route/'frozen.json',views)
