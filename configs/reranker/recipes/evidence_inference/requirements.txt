@@ -1,0 +1,10 @@
+torch==2.6.0
+transformers==4.51.3
+peft==0.15.2
+huggingface-hub==0.35.3
+numpy==1.26.4
+scikit-learn==1.6.1
+scispacy==0.5.5
+spacy==3.7.5
+wandb==0.19.11
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_sm-0.5.4.tar.gz

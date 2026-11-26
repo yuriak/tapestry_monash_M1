@@ -1,0 +1,90 @@
+{
+  "bioasq": {
+    "A": {
+      "bioasq": "c3f2c046d67a181d6b5527ef3a533c044c33a6f0f8c6146083597e461eb79466",
+      "membership": "5b9cacc66a7ddac0cf9443358eba65e684371432fcdbbb78924df1884ef72f81"
+    },
+    "B": {
+      "bioasq": "cf81eaeed067a90e76ee393002ef24e171eb9e5f9337c848243fbfa51ee4c9b1",
+      "membership": "2ceeeed7cd0cf4a41602730c52effa57e5186b2abbb74d52702b7e4741f7962b"
+    },
+    "counts": {
+      "dev": 400,
+      "test": 707,
+      "train": 3607
+    },
+    "inputs": {
+      "prepared/data.json": "107a3fa00c645c8b07cd741b9ea2a6f2a68992345e8ee7bc389eae68ed21cd87",
+      "prepared/raw/question-answer-passages/test-00000-of-00001.parquet": "af1e6bb5e191821e7edfed4118658551612c33759ee25fb601647cda0e0ff602",
+      "prepared/raw/question-answer-passages/train-00000-of-00001.parquet": "86528c502d9ab9bf963dc16f238aae454720482f813ef4de93970df5e64cb30e",
+      "prepared/raw/text-corpus/test-00000-of-00001.parquet": "8ac2d54f2fe5de176f452eb88987b0452c79b60b818769dab2c38f313f72d211",
+      "prepared/tokens.pkl": "f02bee14e228d61fc3bfe5e99ba03c0f31b73e82de985d14989fe9f4a2cfcacc"
+    }
+  },
+  "casehold": {
+    "A": {
+      "membership": "b28252152cf8793af283d11d13c5bd4e683348c54422cc6ac9e817a55526a227"
+    },
+    "B": {
+      "membership": "d8c9e60ddf2d7ed1f1612296e9d3d16518a350e9ac04d71bdf8062bd483ad7a2"
+    },
+    "counts": {
+      "test": 5314,
+      "train": 42509,
+      "validation": 5314
+    },
+    "inputs": {
+      "raw/test.csv": "1467ea7600fef2c287aa171219ab907346e022c36f70477ff5d52b0767956e62",
+      "raw/train.csv": "515aa9c21911d644caeef4a7b962fe079c476e693a2901a43fc09b9a998fbbd5",
+      "raw/val.csv": "22e696e4e5e68fefe28fcce86cca430a03bcddfddb4d464a79b25c60c4d56653"
+    }
+  },
+  "evidence_inference": {
+    "A": {
+      "membership": "265ac54b4489fe0dda5f373583a81b65ab2cfb19eef057d034745d058bd9d0b0"
+    },
+    "B": {
+      "membership": "e8c961986ed48852355ce625746dba2d58741e1e5dcd4578064096681c993b48"
+    },
+    "counts": {
+      "test": 1224,
+      "train": 10116,
+      "validation": 1237
+    },
+    "inputs": {
+      "prepared/documents.json": "309a34e8600c93967667097299e7903217f4b23691ea08a4132d5b22a5931d83",
+      "prepared/test.json": "9805c8b0bbfd55804aae897785512133c2634974252cc6226600e711a1c2c6d1",
+      "prepared/train.json": "7d7fa484669f86be3738fb0b0ebc25c096783b4e8938df09541049a8cd6a6489",
+      "prepared/validation.json": "41bb0f24f915d13dc0bbe80e84236be7e8c7d7f28958c50f9ecf9a66e18edf3c"
+    }
+  },
+  "il_pcsr": {
+    "A": {
+      "lsr": "87848bb1087c6ff1f3f50b6c4be1ab785adfebeae1daf5e47dba96089d049bf8",
+      "membership": "6e5f5ef3124222d011ca556efada041f458bf1249aa93b495324c393443c3b4b",
+      "pcr": "c074bedc629be8d88bb6dae6988bfdbd21ec86e55f6cc6a27dbc2600282125cd"
+    },
+    "B": {
+      "lsr": "45178b2032e4e49bb350f518eaabcf3ffda807a3b9d2ecfc6488b185dd508e7f",
+      "membership": "72c82ac163ea5cb23d504f62424b71c777e862f2412ccad0db5ff59666c7589b",
+      "pcr": "a0f7fb4f0aa7913533969d265ee01cb03169bf3bf0a04207c877b7710b1372f7"
+    },
+    "counts": {
+      "dev": 627,
+      "test": 627,
+      "train": 5017
+    },
+    "inputs": {
+      "prepared/chunks.pkl": "f866287a6400f6105b21e4ce2e77f423688f19e9f963c152bc9c71829f2f362a",
+      "prepared/lsr/data.json": "a1fdc239de0dc0af23c65eba8c1164e7147e5d80695a90becd2e673a1942534f",
+      "prepared/lsr/selection.npy": "574a9c7a63cc7213655f2bbc5732e5ca213c398681e5d18dfb80722b3b6a9534",
+      "prepared/pcr/data.json": "ff84b4b80bc99a7f299c82f6a10975c88d67f0e731a92ec41711a8ea50ef3ca7",
+      "prepared/pcr/selection.npy": "1f2d92b298b60e1183082b96262bf7907dfc40579b85e6c83ee36e417a99eb6e",
+      "raw/dev_queries.parquet": "e987645fb6489cb1e2212740fec598d8153fa66f4d01b18a28d78a76e2733106",
+      "raw/precedent_candidates.parquet": "42223fa31d2d1fad717906b1492d0c99963f0f2313010095a25634530fdf4e03",
+      "raw/statute_candidates.parquet": "c8d0aeb29e5d2b79dba1d46616427ddca6e2f897eac4de4f1e3f8d4ad1ad30f6",
+      "raw/test_queries.parquet": "dc4bb9d2076c4991c48d336a280cb15404fcd1bade9a088d3b51603280bd3e15",
+      "raw/train_queries.parquet": "34c61cabe3393e37d590387cd36bfa95201af5523c882bbd449b7e616beff36a"
+    }
+  }
+}

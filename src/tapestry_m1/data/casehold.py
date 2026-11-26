@@ -1,0 +1,138 @@
+"""Official CaseHOLD all CSV contract, without answer-derived prompts.
+
+Mapping follows casehold/casehold's Apache-2.0 dataset loader (v1.1.0).
+Dataset: Zheng, Guha et al., ICAIL 2021, "When Does Pretraining Help?"
+"""
+import csv
+import hashlib
+import json
+from collections import Counter, defaultdict
+from pathlib import Path
+
+from tapestry_m1.core.io import ContractError, fingerprint, text_key
+
+REVISION = 'acc4532a67e0966e9ed7ec4ca543e8532f983b0c'
+FILES = {
+    'train': ('train.csv', 42509, '515aa9c21911d644caeef4a7b962fe079c476e693a2901a43fc09b9a998fbbd5'),
+    'validation': ('val.csv', 5314, '22e696e4e5e68fefe28fcce86cca430a03bcddfddb4d464a79b25c60c4d56653'),
+    'test': ('test.csv', 5314, '1467ea7600fef2c287aa171219ab907346e022c36f70477ff5d52b0767956e62'),
+}
+
+
+SITE_FILES = {
+    'A': {
+        'train': ('train.csv', 18811, 'aac0dd01b38b559a40d1e21258ed5826b8dbdd64a0e9701eb6c3448daebb83ce'),
+        'validation': ('val.csv', 2356, 'a34174e3b18381692254725c643bfa38e806c6e894d6c28c2018533fdfc8c9fc'),
+        'test': ('test.csv', 2351, '1ed346feb0a3e4bace29c22d702bc6b5d17715c1d315bc9fc49901a1543746a9'),
+    },
+    'B': {
+        'train': ('train.csv', 23698, '74f1b817b25e6ebd4f942e817c37e2452be8a20bcd84bb4ffb33eaa9a4601904'),
+        'validation': ('val.csv', 2958, 'c56bf2b25d33d85ae9e4c840c9f355a71a347431109e80c0b75585e820c349bc'),
+        'test': ('test.csv', 2963, '8eabba10050d32319d6b3b36930e2c63eaf4da77437d95410549c1903d926e75'),
+    },
+    'monash': {
+        'train': ('train.csv', 13119, '8884ad021207270d5500883b9d866fb0729ebcf1f5ce6cdf436c3c4b6d16e947'),
+        'validation': ('val.csv', 1599, 'ca8033a9997092150ebe4715adc15483870a7b1bd18ceba19fc461bb4e43118e'),
+        'test': ('test.csv', 1623, 'f341d3050410d8ff679ff448469225838884c6b81409183982a518c7b4814812'),
+    },
+    'bharatgen': {
+        'train': ('train.csv', 15294, '115cef1182932af46caf7de6edff1850b4376476bfe71940223c8af36fb30429'),
+        'validation': ('val.csv', 1943, 'a923e068ffc7727663ad04c9acde98391e6399a0757c0c5bb729ad2cffd12351'),
+        'test': ('test.csv', 1885, '6b444e2be2c8af8913989fea59fde63b2788e715ca17737bb6fbd542d7b719ad'),
+    },
+    'iitd': {
+        'train': ('train.csv', 14096, 'b564d4e62fe26f05593d8fbff64b65b1f91054d099db501c919a4fbc1ec08660'),
+        'validation': ('val.csv', 1772, '36c93f957104d8e2f7c6da4cad499f51ee73fa3921c1e4a55ad4b4a4e0b3d59f'),
+        'test': ('test.csv', 1806, '308899841aab07a6b11aa988192998ddc932ad91c74274b431787aade1b2f9da'),
+    },
+}
+
+
+def files_for(root):
+    index = Path(root)/'index.jsonl'
+    if not index.is_file():
+        return FILES
+    with index.open() as handle:
+        record = json.loads(handle.readline())
+    if record.get('dataset') != 'casehold' or record.get('site') not in SITE_FILES:
+        raise ContractError('Unexpected CaseHOLD site index')
+    return SITE_FILES[record['site']]
+
+
+def parse_row(row, split):
+    if len(row) != 13 or row[12] not in ['0', '1', '2', '3', '4']:
+        raise ContractError('CaseHOLD requires 13 columns and a zero-based label')
+    if not all(t.strip() for t in row[1:7]) or not row[0].isdigit():
+        raise ContractError('empty CaseHOLD text or invalid source identity')
+    qid = f'{split}:{row[0]}'
+    return {'query_id': qid, 'source_id': row[0], 'split': split,
+            'query_text': row[1], 'gold': int(row[12]),
+            'candidates': [{'doc_id': f'{qid}:{i}', 'text': row[i+2]} for i in range(5)]}
+
+
+def load_split(root, split):
+    name, count, sha = files_for(root)[split]
+    path = Path(root)/name
+    if fingerprint(path) != sha:
+        raise ContractError('CaseHOLD raw checksum mismatch: '+split)
+    with path.open(encoding='utf-8', newline='') as handle:
+        reader = csv.reader(handle)
+        if next(reader) != ['Unnamed: 0']+[str(i) for i in range(12)]:
+            raise ContractError('unexpected CaseHOLD CSV header')
+        groups = [parse_row(row, split) for row in reader]
+    if len(groups) != count or len({g['query_id'] for g in groups}) != count:
+        raise ContractError('unexpected split count or repeated source ID')
+    return groups
+
+
+def audit(root, comparison_limit=250000):
+    """Exact normalized tuples + bounded bottom-hash blocking/Jaccard screen.
+
+    Approximate near-duplicate screen is explicitly not an exhaustive proof.
+    No official rows are removed, including any detected overlaps.
+    """
+    splits = {s: load_split(root, s) for s in FILES}
+    exact, blocks, seen = defaultdict(list), defaultdict(list), []
+    overlaps, near, comparisons, capped = Counter(), Counter(), 0, False
+    for split, groups in splits.items():
+        for group in groups:
+            parts = [text_key(group['query_text'])]+[text_key(c['text']) for c in group['candidates']]
+            key = hashlib.sha256('\0'.join(parts).encode()).hexdigest()
+            for other in exact[key]:
+                overlaps['|'.join(sorted([split, other]))] += 1
+            exact[key].append(split)
+            words = ' '.join(parts).split()
+            shingles = {hashlib.blake2b(' '.join(words[i:i+3]).encode(), digest_size=8).digest()
+                        for i in range(len(words)-2)}
+            # Eight bottom hashes generate candidates; bounded buckets prevent quadratic work.
+            keys = sorted(shingles)[:8]
+            candidates = set(j for k in keys for j in blocks[k])
+            cross = [j for j in sorted(candidates) if seen[j][0] != split and seen[j][1] != key]
+            if len(cross) > 16:
+                capped = True
+            for j in cross[:16]:
+                other_split, other_key, other_shingles = seen[j]
+                if other_split == split or other_key == key:
+                    continue
+                if comparisons >= comparison_limit:
+                    capped = True
+                    break
+                comparisons += 1
+                similarity = len(shingles & other_shingles)/len(shingles | other_shingles)
+                if similarity >= .90:
+                    near['|'.join(sorted([split, other_split]))] += 1
+            index = len(seen)
+            seen.append((split, key, shingles))
+            for k in keys:
+                if len(blocks[k]) < 32:
+                    blocks[k].append(index)
+                else:
+                    capped = True
+    return {'dataset': 'casehold/casehold', 'config': 'all', 'revision': REVISION,
+            'mapping': {'query': 1, 'choices': [2,3,4,5,6], 'label': 12, 'label_base': 0},
+            'files': {s: {'file': v[0], 'count': v[1], 'sha256': v[2]} for s,v in files_for(root).items()},
+            'label_counts': {s: dict(Counter(g['gold'] for g in gs)) for s,gs in splits.items()},
+            'exact_normalized_tuple_pairs': dict(overlaps),
+            'near_duplicate_screen': {'method': '8 bottom 64-bit trigram hashes; bucket cap32; max16 cross-split comparisons per query; Jaccard>=0.90',
+                'comparisons': comparisons, 'comparison_limit': comparison_limit, 'bounded_or_capped': capped,
+                'exhaustive': False, 'cross_split_pairs': dict(near)}, 'official_splits_unchanged': True}

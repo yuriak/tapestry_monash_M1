@@ -1,0 +1,98 @@
+{
+  "bioasq": {
+    "bharatgen": {
+      "bioasq": "4367985cbfe8fa7f8f8c6ac467342c08baed06f4472f46e08899412eea2de3f6",
+      "membership": "054da5506ece5e4a2cf0208d8a84b001ba7e7dae30fafe2bfe0582d7fc118360"
+    },
+    "counts": {
+      "dev": 400,
+      "test": 707,
+      "train": 3607
+    },
+    "iitd": {
+      "bioasq": "76871c65b8531ea33e1513b972223a802a2e7c9aae39d9c46dd098ee19dc968a",
+      "membership": "960a578d96e1bc6ee457b95051b8477dbf7fd05d6803f3bd463c1202519c5e67"
+    },
+    "monash": {
+      "bioasq": "78b95c63463694dc3ad92d699ba82a43d51384c5b2cdc0aa3f807bdc8eafa5e8",
+      "membership": "eba37c2ccc13ddcba5e45c917a7dd64da3f3a2da05b97ceb8012ea1d2c35cae6"
+    }
+  },
+  "casehold": {
+    "bharatgen": {
+      "membership": "2464ee3ea66d790c9e14787acf9a72de1c41ff69a2aaed8fbc8d7af973e018ab"
+    },
+    "counts": {
+      "test": 5314,
+      "train": 42509,
+      "validation": 5314
+    },
+    "iitd": {
+      "membership": "cc2a8d010ff37f329df36cc71eb37a524314ccf5f17f2ec5a8a5434573e010ad"
+    },
+    "monash": {
+      "membership": "f446dd79c5b1e49033503185efbd6516f2083af60034375bfc096b5d285a1e67"
+    }
+  },
+  "evidence_inference": {
+    "bharatgen": {
+      "membership": "46bc388c39ac672d51340965f16d0cd72b307824e01556f052214ea1bf5d19eb"
+    },
+    "counts": {
+      "test": 1224,
+      "train": 10116,
+      "validation": 1237
+    },
+    "iitd": {
+      "membership": "5daedb211859dbda09ba8ff2e0c559710a7a9a92fb7e4015d10b04d97cf42bda"
+    },
+    "monash": {
+      "membership": "1fc5c1e5b2e1901cf1ed85fba1cc453c6c191860feceda3b6163d556370d1a7e"
+    }
+  },
+  "il_pcsr": {
+    "bharatgen": {
+      "lsr": "e996c70614ecbdd9347984ae7ea98de815ad91adb2e55b955fe64f5664f540b9",
+      "membership": "7a421c400e376fd4f0d7b1a01507389dc24dc71b7f38e03b29548a079ec34d9d",
+      "pcr": "eb3eb8b9a66ebd2e141f080f37b0832cfba0d2fec65e884c97b4a82f6d9ed601"
+    },
+    "counts": {
+      "dev": 627,
+      "test": 627,
+      "train": 5017
+    },
+    "iitd": {
+      "lsr": "c3b02f33359850410a8424a545a5d85d1f6fc906a6143a9652ac909a4ad75170",
+      "membership": "81dd70f169a1dbbc7a928599734fe8121b09614fca980a1ffbd1f753a3808688",
+      "pcr": "f62c68ecc766c014fe305b6a7a2daa9a80637e0c1ae471b10b32d58681bc87f5"
+    },
+    "monash": {
+      "lsr": "a115133c2d48334d12f2f64f0f669786adb2ba4db8083ab1f42fb5815e1b24a2",
+      "membership": "a3fc5423741c9142245f70134d1932bbf97c70a5fe8321ed03a5aae9046946e2",
+      "pcr": "f4eea149b48b7622315ee1962c16c478346dc27f1965c54e4083dc536517d374"
+    }
+  },
+  "judicialmind": {
+    "bharatgen": {
+      "judicialmind": "a2bc60d1b58bcb1d8dd7e9bf6068252d6b009d582bd873ec7893a4c30aa4af50",
+      "membership": "b4c7f9c6cf6810ec58259caca5348e9d60d1d739d0540e2382745b5919ed8671"
+    },
+    "counts": {
+      "dev": 512,
+      "test": 512,
+      "train": 25971
+    },
+    "iitd": {
+      "judicialmind": "4d9a8375e7d89b9280ae63554b0de499a7b2a18bede0e43cd1b969d739243046",
+      "membership": "e8fc085e830fa4a38486219a599e1cd5cee9c011299bea1326358013d6362597"
+    },
+    "inputs": {
+      "prepared/data.json": "3c0783bee910f656ef06c0f918ad473cbbbf61175b43bd28e505e400feb19283",
+      "prepared/tokens.pkl": "e55345422ff31cd50d5ee838242596d06abf2c9941d6b27696b325e61de9bf08"
+    },
+    "monash": {
+      "judicialmind": "40ebd050b0b64c206c7dcc938c3782583d259dd3f450d5e02758ada8bf907191",
+      "membership": "83b03e3f21a2efa91ffc1f4c581794f9b5f02f20583def6817888aa9f99b6fbc"
+    }
+  }
+}

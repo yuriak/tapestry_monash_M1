@@ -1,7 +1,8 @@
 /.venv/
 /.venvs/
 /.runtime/
-/data/
+/data/*
+!/data/README.md
 /outputs/
 __pycache__/
 *.py[cod]

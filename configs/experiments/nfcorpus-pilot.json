@@ -1,0 +1,21 @@
+{
+  "schema_version": "m1.nfcorpus.pilot.v1",
+  "seed": 20261110,
+  "archive_url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/nfcorpus.zip",
+  "archive_md5": "a89dba18a62ef92f7d323ec890a0d38d",
+  "terms_url": "https://www.cl.uni-heidelberg.de/statnlpgroup/nfcorpus/",
+  "terms": "Free to use for academic purposes; cite Boteva et al. (2016). Other uses require source-author consultation. No redistribution of source texts in this repository.",
+  "representation": "title.strip() + newline + text.strip(), then strip; source files unchanged",
+  "bm25": {"variant": "positive-IDF Okapi", "k1": 1.2, "b": 0.75, "tokenizer": "lowercase ASCII alphanumeric regex [a-z0-9]+; no stemming/stopwords; query terms unique", "top_k": 50, "tie_break": "ascending document ID"},
+  "minimum_query_hit_rate": 0.8,
+  "model": "../reranker/qwen3-reranker-0.6b.json",
+  "instruction": "Given a web search query, retrieve relevant passages that answer the query",
+  "dtype": "bfloat16",
+  "attention_backend": "sdpa",
+  "max_tokens": 2048,
+  "reranker_batch": 1,
+  "score": "float32 yes-minus-no logit, descending; ascending document ID for ties",
+  "gain": "2^rel-1",
+  "preflight": {"pairs": 8, "batch_compare": [1, 2], "max_abs_logit_difference": 0.5, "max_pairwise_order_disagreements": 1},
+  "training_plan": {"objectives": ["L0", "L2"], "steps": 200, "checkpoints": [50, 100, 200], "lr": 0.00005, "weight_decay": 0.01, "effective_groups": 8, "micro_groups": 1, "lora_rank": 16, "lora_alpha": 32, "lora_dropout": 0.05}
+}

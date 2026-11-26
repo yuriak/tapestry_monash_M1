@@ -19,7 +19,7 @@ from tapestry_m1.runtime.provenance import code_fingerprint
 from tapestry_m1.runtime.training_checkpoint import save_peft_checkpoint,load_peft_state,restore_rng
 
 
-def prepare_inputs(backend,groups):
+def prepare_inputs(backend,groups,device='cuda'):
     pairs=[reranker_text(backend.config['instruction'],g['query_text'],c['text']) for g in groups for c in g['candidates']]
     tokens=backend.tokenizer(pairs,padding=False,truncation=False,add_special_tokens=True)['input_ids']
     budget=backend.limit-len(backend.prefix)-len(backend.suffix)
@@ -29,7 +29,7 @@ def prepare_inputs(backend,groups):
             'native_tokens':len(t)+len(backend.prefix)+len(backend.suffix),'retained_tokens':len(x),'truncated':len(t)>budget}
            for (g,c),t,x in zip([(g,c) for g in groups for c in g['candidates']],tokens,ids)]
     audit={'pairs':len(tokens),'truncated':sum(x['truncated'] for x in items),'items':items}
-    return backend.tokenizer.pad({'input_ids':ids},padding=True,return_tensors='pt').to('cuda'),audit
+    return backend.tokenizer.pad({'input_ids':ids},padding=True,return_tensors='pt').to(device),audit
 
 
 def scores_for(backend,groups):
